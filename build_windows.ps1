@@ -50,7 +50,7 @@ function Write-Error {
 }
 
 # Start build process
-Write-Header "ZeroComp $Version Build Script"
+Write-Header "Pressor2000 $Version Build Script"
 
 # Load .env file if present (KEY=VALUE format, one per line)
 $EnvFilePath = "$RootDir\.env"
@@ -260,8 +260,8 @@ if ($LASTEXITCODE -ne 0) {
 
 # Build all plugin formats in a single cmake invocation so shared dependencies
 # (JUCE モジュール等) はまとめて 1 回だけコンパイルされ、各フォーマットは並列ビルドされる。
-$BuildTargets = @("ZeroComp_VST3", "ZeroComp_Standalone", "ZeroComp_CLAP")
-if ($BuildAAX) { $BuildTargets += "ZeroComp_AAX" }
+$BuildTargets = @("Pressor2000_VST3", "Pressor2000_Standalone", "Pressor2000_CLAP")
+if ($BuildAAX) { $BuildTargets += "Pressor2000_AAX" }
 
 Write-Step ("Building plugin formats: " + ($BuildTargets -join ', '))
 cmake --build . --config $Configuration --target $BuildTargets --parallel
@@ -276,14 +276,11 @@ Write-Header "Step 3: Packaging for distribution"
 
 # Copy VST3 files
 Write-Step "Copying VST3 files..."
-$SourceVST3 = "$BuildDir\plugin\ZeroComp_artefacts\$Configuration\VST3\ZeroComp.vst3"
-$DestVST3 = "$OutputDir\Windows\ZeroComp.vst3"
+$SourceVST3 = "$BuildDir\plugin\Pressor2000_artefacts\$Configuration\VST3\Pressor2000.vst3"
+$DestVST3 = "$OutputDir\Windows\Pressor2000.vst3"
 
 if (Test-Path $SourceVST3) {
     # 既存の VST3 バンドルがある場合は削除してからコピーする。
-    # PowerShell の Copy-Item は、宛先フォルダが既に存在すると
-    # SourceDir を DestDir\(SourceDir名) として入れ子にしてしまうため、
-    # 二重フォルダ生成を避ける。
     if (Test-Path $DestVST3) {
         Remove-Item -Path $DestVST3 -Recurse -Force
     }
@@ -296,8 +293,8 @@ if (Test-Path $SourceVST3) {
 
 # Copy Standalone files
 Write-Step "Copying Standalone files..."
-$SourceStandalone = "$BuildDir\plugin\ZeroComp_artefacts\$Configuration\Standalone\ZeroComp.exe"
-$DestStandalone = "$OutputDir\Windows\ZeroComp.exe"
+$SourceStandalone = "$BuildDir\plugin\Pressor2000_artefacts\$Configuration\Standalone\Pressor2000.exe"
+$DestStandalone = "$OutputDir\Windows\Pressor2000.exe"
 
 if (Test-Path $SourceStandalone) {
     # 既存の EXE がある場合は削除してからコピーする（上書き時のロック/属性問題回避）。
@@ -312,10 +309,9 @@ if (Test-Path $SourceStandalone) {
 }
 
 # Copy CLAP files
-# CLAP は単一ファイル（.clap = DLL に拡張子を付けたもの）。Authenticode 署名は Step 3.5 で実施。
 Write-Step "Copying CLAP files..."
-$SourceCLAP = "$BuildDir\plugin\ZeroComp_artefacts\$Configuration\CLAP\ZeroComp.clap"
-$DestCLAP = "$OutputDir\Windows\ZeroComp.clap"
+$SourceCLAP = "$BuildDir\plugin\Pressor2000_artefacts\$Configuration\CLAP\Pressor2000.clap"
+$DestCLAP = "$OutputDir\Windows\Pressor2000.clap"
 
 if (Test-Path $SourceCLAP) {
     if (Test-Path $DestCLAP) {
@@ -334,8 +330,8 @@ $AAXSigningStatus = "unsigned_developer"
 
 if ($BuildAAX) {
     Write-Step "Processing AAX plugin..."
-    $SourceAAX = "$BuildDir\plugin\ZeroComp_artefacts\$Configuration\AAX\ZeroComp.aaxplugin"
-    $DestAAX = "$OutputDir\Windows\ZeroComp.aaxplugin"
+    $SourceAAX = "$BuildDir\plugin\Pressor2000_artefacts\$Configuration\AAX\Pressor2000.aaxplugin"
+    $DestAAX = "$OutputDir\Windows\Pressor2000.aaxplugin"
     
     if (Test-Path $SourceAAX) {
         # 既存の AAX バンドルがある場合は削除してからコピーする。
@@ -470,12 +466,12 @@ Invoke-AuthenticodeSign -Paths @($Vst3InnerPE, $DestStandalone, $DestCLAP) | Out
 # Create README
 Write-Step "Creating documentation..."
 $ReadmeContent = @"
-ZeroComp $Version - Windows Installation Guide
+Pressor2000 $Version - Windows Installation Guide
 ====================================================
 
 Important: Required Software
 -------------------
-This plugin requires the Microsoft Visual C++ 2019 Redistributable Package.
+This plugin requires the Microsoft Visual C++ 2019-2022 Redistributable Package.
 If the plugin fails to load, please download and install it from the following link:
 https://aka.ms/vs/17/release/vc_redist.x64.exe
 
@@ -484,15 +480,15 @@ Installation Steps
 1. Close your DAW before proceeding.
 
 2. For VST3 Plugin:
-   Copy the entire ZeroComp.vst3 folder to the following location:
+   Copy the entire Pressor2000.vst3 folder to the following location:
    C:\Program Files\Common Files\VST3\
 
 3. For Standalone Application:
-   Copy ZeroComp.exe to any preferred location, for example:
-   C:\Program Files\ZeroComp\ or your Desktop.
+   Copy Pressor2000.exe to any preferred location, for example:
+   C:\Program Files\Pressor2000\ or your Desktop.
 
 4. For CLAP Plugin:
-   Copy ZeroComp.clap to the following location:
+   Copy Pressor2000.clap to the following location:
    C:\Program Files\Common Files\CLAP\
 
 "@
@@ -501,7 +497,7 @@ if ($BuildAAX) {
     $ReadmeContent += @"
 
 5. For AAX Plugin (Pro Tools):
-   Copy the entire ZeroComp.aaxplugin folder to the following location:
+   Copy the entire Pressor2000.aaxplugin folder to the following location:
    C:\Program Files\Common Files\Avid\Audio\Plug-Ins\
 
 "@
@@ -528,7 +524,7 @@ if ($BuildAAX) {
 }
 
 $VersionInfo = @{
-    name = "ZeroComp"
+    name = "Pressor2000"
     version = $Version
     build_date = $BuildDate
     platform = "Windows"
@@ -563,7 +559,7 @@ if (Test-Path $InnoSetupPath) {
         
         if ($LASTEXITCODE -eq 0) {
             Write-Success "Installer created successfully"
-            $InstallerPath = "$OutputDir\ZeroComp_${Version}_Windows_Setup.exe"
+            $InstallerPath = "$OutputDir\Pressor2000_${Version}_Windows_Setup.exe"
             Invoke-AuthenticodeSign -Paths @($InstallerPath) | Out-Null
             if (Test-Path $InstallerPath) {
                 $InstallerInfo = Get-Item $InstallerPath
@@ -584,9 +580,9 @@ if (Test-Path $InnoSetupPath) {
 # Create ZIP archive (as backup or alternative distribution)
 Write-Step "Creating ZIP archive..."
 if ($BuildAAX) {
-    $ZipName = "ZeroComp_${Version}_Windows_VST3_AAX_CLAP_Standalone.zip"
+    $ZipName = "Pressor2000_${Version}_Windows_VST3_AAX_CLAP_Standalone.zip"
 } else {
-    $ZipName = "ZeroComp_${Version}_Windows_VST3_CLAP_Standalone.zip"
+    $ZipName = "Pressor2000_${Version}_Windows_VST3_CLAP_Standalone.zip"
 }
 $ZipPath = "$OutputDir\$ZipName"
 
@@ -632,11 +628,11 @@ if ($BuildAAX) {
     }
 }
 Write-Host "The package includes:" -ForegroundColor Cyan
-Write-Host "[✓] ZeroComp.vst3 (with embedded WebUI)" -ForegroundColor Green
-Write-Host "[✓] ZeroComp.exe (Standalone application)" -ForegroundColor Green
-Write-Host "[✓] ZeroComp.clap (CLAP plugin)" -ForegroundColor Green
+Write-Host "[✓] Pressor2000.vst3 (with embedded WebUI)" -ForegroundColor Green
+Write-Host "[✓] Pressor2000.exe (Standalone application)" -ForegroundColor Green
+Write-Host "[✓] Pressor2000.clap (CLAP plugin)" -ForegroundColor Green
 if ($BuildAAX) {
-    Write-Host "[✓] ZeroComp.aaxplugin ($AAXSigningStatusSummary)" -ForegroundColor Green
+    Write-Host "[✓] Pressor2000.aaxplugin ($AAXSigningStatusSummary)" -ForegroundColor Green
 }
 Write-Host "[✓] Installation instructions" -ForegroundColor Green
 Write-Host "[✓] Version information" -ForegroundColor Green
@@ -648,7 +644,7 @@ if ($BuildAAX) {
 } else {
     Write-Host "[✓] VST3, Standalone, and CLAP compiled in $Configuration mode" -ForegroundColor Green
 }
-if (Test-Path "$OutputDir\ZeroComp_${Version}_Windows_Setup.exe") {
+if (Test-Path "$OutputDir\Pressor2000_${Version}_Windows_Setup.exe") {
     Write-Host "[✓] Installer created with Inno Setup" -ForegroundColor Green
 }
 Write-Host "[✓] Installation guide included" -ForegroundColor Green
@@ -663,4 +659,4 @@ if ($BuildAAX) {
 Write-Host "[ ] Upload to distribution platform" -ForegroundColor Yellow
 Write-Host "[ ] Share link with beta testers" -ForegroundColor Yellow
 Write-Host ""
-Write-Host "============================================" -ForegroundColor Cyan
+Write-Header "Build Finished"

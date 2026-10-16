@@ -1,20 +1,14 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// Copyright (C) 2026 Jun Murakami
+// Copyright (C) 2026 scobru
 import React from 'react';
 import { Box, Tooltip, Typography } from '@mui/material';
 import { useJuceComboBoxIndex } from '../hooks/useJuceParam';
 
-// コンプの動作モード（VCA / Opto / FET / Vari-Mu）を横並びタブで切替えるセレクタ。
-//  HorizontalParameter と同じ labelWidth を使って縦方向に揃えつつ、
-//  このコンポーネントは数値入力を持たないのでトグル列を最右端までぶち抜いて使う。
-
 interface ModeSelectorProps {
   parameterId: string;
   label: string;
-  /** ラベル列の幅（HorizontalParameter と合わせる） */
   labelWidth?: number;
   options?: string[];
-  /** Tooltip に出す補足説明（option と同じ長さの配列） */
   descriptions?: string[];
 }
 
@@ -23,7 +17,7 @@ const DEFAULT_OPTIONS = ['VCA', 'Opto', 'FET', 'Vari-Mu'];
 export const ModeSelector: React.FC<ModeSelectorProps> = ({
   parameterId,
   label,
-  labelWidth = 46,
+  labelWidth = 52,
   options = DEFAULT_OPTIONS,
   descriptions,
 }) => {
@@ -43,7 +37,7 @@ export const ModeSelector: React.FC<ModeSelectorProps> = ({
     >
       <Typography
         variant='caption'
-        sx={{ fontWeight: 500, fontSize: '0.72rem', color: 'text.primary', lineHeight: 1 }}
+        sx={{ fontWeight: 700, fontSize: '0.70rem', color: '#94a3b8', letterSpacing: '0.6px', textTransform: 'uppercase', lineHeight: 1 }}
       >
         {label}
       </Typography>
@@ -51,11 +45,11 @@ export const ModeSelector: React.FC<ModeSelectorProps> = ({
       <Box
         sx={{
           display: 'flex',
-          border: '1px solid',
-          borderColor: 'divider',
-          borderRadius: 1,
+          border: '1px solid #222938',
+          borderRadius: '6px',
           overflow: 'hidden',
           height: 24,
+          backgroundColor: '#0b0e14',
         }}
       >
         {options.map((opt, i) => {
@@ -72,17 +66,20 @@ export const ModeSelector: React.FC<ModeSelectorProps> = ({
                 justifyContent: 'center',
                 px: 0.5,
                 fontSize: '0.72rem',
-                fontWeight: active ? 600 : 400,
-                letterSpacing: 0.2,
+                fontWeight: active ? 700 : 500,
+                letterSpacing: 0.4,
                 whiteSpace: 'nowrap',
                 cursor: 'pointer',
                 userSelect: 'none',
-                backgroundColor: active ? 'primary.main' : 'transparent',
-                color: active ? 'background.paper' : 'text.secondary',
-                borderRight: i < options.length - 1 ? '1px solid' : 'none',
-                borderColor: 'divider',
-                transition: 'background-color 80ms',
-                '&:hover': { backgroundColor: active ? 'primary.dark' : 'grey.700' },
+                backgroundColor: active ? '#00d2ff' : 'transparent',
+                color: active ? '#090c12' : '#94a3b8',
+                boxShadow: active ? '0 0 10px rgba(0, 210, 255, 0.45)' : 'none',
+                borderRight: i < options.length - 1 ? '1px solid #222938' : 'none',
+                transition: 'all 0.15s ease',
+                '&:hover': {
+                  backgroundColor: active ? '#00d2ff' : '#161c28',
+                  color: active ? '#090c12' : '#f8fafc',
+                },
               }}
             >
               {opt}

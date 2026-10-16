@@ -1,80 +1,44 @@
-# ZeroComp
+# Pressor2000
 
-A **zero-latency** feedforward compressor for broadcast, streaming, and live production, with four analog-flavored modes (VCA / Opto / FET / Vari-Mu). Built with JUCE + WebView (Vite / React 19 / MUI 7). Ships as **VST3 / AU / AAX / Standalone** on Windows / macOS and **VST3 / LV2 / CLAP / Standalone** on Linux, plus a WebAssembly browser demo that reuses the exact same DSP.
+A high-precision **zero-latency** studio compressor with vintage analog character (VCA / Opto / FET / Vari-Mu), real-time transfer curve graph, and dual-mode metering / oscilloscope waveform visualization. Built with JUCE + WebView (Vite / React 19 / MUI). Ships as **VST3 / AU / CLAP / Standalone** on Windows & macOS.
 
-You can find the demo site running on WebAssembly here.
-https://zerocomp-demo.web.app/
-
-<img width="1328" height="945" alt="sc_zerocomp" src="https://github.com/user-attachments/assets/62d4e2f6-3f82-4d6a-8dab-9d793afa72b3" />
+Maintained by **scobru** — [https://github.com/scobru/pressor2000](https://github.com/scobru/pressor2000)
 
 ## Highlights
 
-- **0-sample latency** — no lookahead, no oversampling. Instant attack with smoothed release envelope. Suitable for live/broadcast where monitoring delay is unacceptable.
-- **Four analog modes** — VCA (clean) / Opto (slow, trailing release with LDR thermal memory) / FET (asymmetric grit) / Vari-Mu (soft knee + even-order warmth). All stay zero-latency; only envelope behaviour and post-gain saturation differ.
-- **Wide dynamic range** — Threshold from 0 down to -80 dBFS, Ratio from 1:1 to 100:1 (effectively brickwall at the high end).
-- **Soft knee** — 0..24 dB continuously variable knee. The displayed transfer curve stays in sync with the DSP at all times.
-- **Auto Makeup** — one-click half-compensation `-threshold × (1 - 1/ratio) × 0.5`. Keeps perceived loudness up without crushing peaks to the ceiling. Output Gain still works on top as a ± trim.
-- **Real-time transfer curve graph** — the center panel shows the static IN→OUT curve; the current input level appears as a blue dot riding along the curve. Auto Makeup shifts the curve up live.
-- **Three-mode metering** — Input L/R, Gain Reduction, Output L/R with Peak / RMS / Momentary LKFS (ITU-R BS.1770-4) switchable from a single button.
-- **Waveform display mode** — Oscilloscope (~7 sec scrollback): input envelope, threshold line, and per-sample gain-reduction reflection. Switch on the fly from the Metering / Waveform toggle in the title bar.
-- **Stereo-linked gain** — L/R share the same gain envelope (computed from `max(|L|,|R|)`) so the stereo image stays intact.
-- **Mobile-friendly WebAssembly demo** — the same compressor DSP runs in the browser via an `AudioWorklet`; the UI collapses into a phone-friendly single-column layout on narrow viewports.
-
-## Layout
-
-- Left — Threshold fader (0..-80 dB) and Ratio fader (1:1..100:1, log skew, 1:1 at top).
-- Center-left — Real-time transfer curve graph (threshold marker, current operating dot, Auto Makeup shift).
-- Center-right — Input / GR / Output meters with a single Peak/RMS/Momentary toggle below them.
-- Right — Output Gain fader (-24..+24 dB). Stays active even when Auto Makeup is on, acting as a trim.
-- Bottom left — Knee slider and Mode selector (VCA / Opto / FET / Vari-Mu).
-- Bottom right — Attack and Release sliders.
-
-The plugin window is resizable (minimum 520 × 390, default 720 × 500).
-
-## Modes
-
-| Mode | Character | Implementation |
-| --- | --- | --- |
-| **VCA** | Clean, transparent | Single envelope, no colouration. The default. |
-| **Opto** | Slow, trailing release | Dual envelope (`fast` + `slow = release × 5`) with `max(GR)` fed out. **LDR thermal memory**: an internal `ldrHeat` state tracks recent GR and pushes the slow envelope toward a longer `release × 15` tail after sustained compression, then cools over ~3 s. |
-| **FET** | Asymmetric grit | Subtle post-gain asymmetric `tanh` clipper. |
-| **Vari-Mu** | Soft knee + even-order warmth | Knee widens by +12 dB internally; post-gain `sign(x) · x²` wave-shaper adds gentle tube-like harmonics. |
+- **0-sample latency** — no lookahead, no latency penalty. Instant response with smooth analog envelope modeling. Perfect for tracking, broadcast, and master buss dynamics.
+- **Four analog modes** — VCA (clean & punchy) / Opto (slow, trailing release with LDR thermal memory) / FET (asymmetric grit & bite) / Vari-Mu (soft knee + tube saturation).
+- **Modern Neon Cyan / Dark Aesthetic** — Clean hardware-inspired interface with electric cyan glowing meters, amber reduction indicators, and precision numeric readouts matching the high-contrast aesthetic.
+- **Sidechain Filtering** — Integrated HPF / LPF with selectable slope (6/12/18/24 dB/oct) for tight low-end management and vocal de-essing.
+- **Real-time transfer curve graph** — Visualizes compression curves with live operating point, knee inflection, and auto-makeup shift.
+- **Waveform display mode** — Integrated oscilloscope scrollback showing waveform peaks, threshold ceiling, and gain reduction envelope.
+- **Three-mode metering** — Peak, RMS, and Momentary LKFS (ITU-R BS.1770-4) loudness metering.
+- **Auto Makeup Gain** — Intelligent gain compensation based on threshold and ratio with dedicated manual trim.
 
 ## Requirements
 
 - CMake 3.22+
-- C++17 toolchain
-  - Windows: Visual Studio 2022 with the C++ workload
-  - macOS: Xcode 14+
-  - Linux: gcc 13+ / clang + the apt packages listed under [Building on Linux](#building-on-linux)
+- C++17 toolchain (MSVC 2022 on Windows, Xcode on macOS)
 - Node.js 18+ and npm (for the WebUI)
-- JUCE (included as a submodule)
-- `clap-juce-extensions` (also a git submodule, used only for the Linux CLAP target)
-- Optional: AAX SDK for Pro Tools builds (drop at `aax-sdk/`)
-- Optional: Inno Setup 6 for the Windows installer
-- Optional: [Emscripten](https://emscripten.org) for the WebAssembly demo
+- JUCE 8 (included as submodule)
+- `clap-juce-extensions` (included as submodule)
 
-## Getting started
+## Getting Started
 
 ```bash
 # 1. Clone with submodules
-git clone <this-repo>
-cd ZeroComp
+git clone https://github.com/scobru/pressor2000.git
+cd pressor2000
 git submodule update --init --recursive
 
-# 2. WebUI dependencies
-cd webui && npm install && cd ..
+# 2. Build WebUI
+cd webui
+npm install
+npm run build
+cd ..
 
-# 3. Build (Windows, Release distribution)
+# 3. Build Windows (Release)
 powershell -ExecutionPolicy Bypass -File build_windows.ps1 -Configuration Release
-# → produces releases/<VERSION>/ZeroComp_<VERSION>_Windows_VST3_AAX_Standalone.zip
-#   and (if Inno Setup 6 is installed) ZeroComp_<VERSION>_Windows_Setup.exe
-
-# 4. Build (macOS)
-./build_macos.zsh
-
-# 5. Build (Linux — see "Building on Linux" below)
-bash build_linux.sh
 ```
 
 ### Building on Linux

@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// Copyright (C) 2026 Jun Murakami
+// Copyright (C) 2026 scobru
 import React, { useLayoutEffect, useRef } from 'react';
 import { Box, Typography } from '@mui/material';
 
 // コンプレッサー静的カーブ（Input dB → Output dB）の可視化
 //  x/y 範囲は 0..-60 dB。threshold, ratio, knee がリアルタイムに反映される。
-//  さらに現在の入力ピーク (inputDb) を赤マーカーで、出力ピーク (outputDb) を水平線で重ねる。
+//  さらに現在の入力ピーク (inputDb) をマーカーで、出力ピーク (outputDb) を水平線で重ねる。
 
 interface RatioGraphProps {
   thresholdDb: number;
@@ -25,9 +25,6 @@ interface RatioGraphProps {
 const GRAPH_MIN_DB = -60;
 const GRAPH_MAX_DB = 0;
 
-// x 軸 / y 軸を個別の長さで扱う。
-//  x 軸: 左端 = GRAPH_MIN_DB, 右端 = GRAPH_MAX_DB
-//  y 軸: 下端 = GRAPH_MIN_DB, 上端 = GRAPH_MAX_DB
 const dbToX = (db: number, w: number): number => {
   const clamped = Math.max(GRAPH_MIN_DB, Math.min(GRAPH_MAX_DB, db));
   const t = (clamped - GRAPH_MIN_DB) / (GRAPH_MAX_DB - GRAPH_MIN_DB);
@@ -36,11 +33,10 @@ const dbToX = (db: number, w: number): number => {
 const dbToY = (db: number, h: number): number => {
   const clamped = Math.max(GRAPH_MIN_DB, Math.min(GRAPH_MAX_DB, db));
   const t = (clamped - GRAPH_MIN_DB) / (GRAPH_MAX_DB - GRAPH_MIN_DB);
-  return h - t * h; // y は下向きが正なので反転
+  return h - t * h;
 };
 
 const computeOutputDb = (inDb: number, threshold: number, ratio: number, knee: number): number => {
-  // Giannoulis/Massberg/Reiss 2012: y = x, x + slope*(x-T)^2/(2K) (soft knee), x + slope*(x-T)
   const slope = 1 - 1 / Math.max(1, ratio);
   if (knee <= 0) {
     if (inDb <= threshold) return inDb;
@@ -80,12 +76,12 @@ export const RatioGraph: React.FC<RatioGraphProps> = ({
     if (!ctx) return;
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
-    // 背景
-    ctx.fillStyle = '#1a1a1a';
+    // 背景 - deep sleek dark matching Spectra Denoiser visualizer
+    ctx.fillStyle = '#0b0e14';
     ctx.fillRect(0, 0, W, H);
 
     // グリッド（6dB ごとに垂直 / 水平）
-    ctx.strokeStyle = '#333';
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.05)';
     ctx.lineWidth = 0.5;
     for (let db = -6; db >= GRAPH_MIN_DB; db -= 6) {
       const x = dbToX(db, W);
@@ -100,9 +96,8 @@ export const RatioGraph: React.FC<RatioGraphProps> = ({
       ctx.stroke();
     }
 
-    // ユニティライン（1:1 参照）— x 軸・y 軸が非等長なとき、対角線ではなく
-    //  dB 空間上での y=x を描くためサンプリングする（短辺の長さに影響されない）。
-    ctx.strokeStyle = 'rgba(120,120,120,0.6)';
+    // ユニティライン（1:1 参照）
+    ctx.strokeStyle = 'rgba(148, 163, 184, 0.25)';
     ctx.setLineDash([3, 3]);
     ctx.lineWidth = 1;
     ctx.beginPath();
@@ -117,11 +112,12 @@ export const RatioGraph: React.FC<RatioGraphProps> = ({
     }
     ctx.setLineDash([]);
 
-    // 静的カーブ
-    //  Auto Makeup ON のときは、出力全体を makeupDb 分だけ上にシフトして描画する。
-    //  これで「Makeup を有効にすると全体がこれだけ持ち上がる」が視覚的に見える。
-    ctx.strokeStyle = '#4fc3f7';
-    ctx.lineWidth = 2;
+    // 静的カーブ - Electric Neon Cyan with soft glow
+    ctx.save();
+    ctx.strokeStyle = '#00d2ff';
+    ctx.shadowColor = 'rgba(0, 210, 255, 0.5)';
+    ctx.shadowBlur = 6;
+    ctx.lineWidth = 2.2;
     ctx.beginPath();
     let first = true;
     const step = Math.max(1, Math.floor(W / 240));
@@ -137,13 +133,14 @@ export const RatioGraph: React.FC<RatioGraphProps> = ({
       }
     }
     ctx.stroke();
+    ctx.restore();
 
-    // Threshold マーカー（縦破線）
+    // Threshold マーカー（縦破線） - Warm Amber matching Spectra Denoiser reduction slider
     {
       const x = dbToX(thresholdDb, W);
-      ctx.strokeStyle = 'rgba(255,171,0,0.6)';
+      ctx.strokeStyle = 'rgba(255, 159, 28, 0.85)';
       ctx.setLineDash([2, 3]);
-      ctx.lineWidth = 1;
+      ctx.lineWidth = 1.2;
       ctx.beginPath();
       ctx.moveTo(x + 0.5, 0);
       ctx.lineTo(x + 0.5, H);
@@ -151,23 +148,28 @@ export const RatioGraph: React.FC<RatioGraphProps> = ({
       ctx.setLineDash([]);
     }
 
-    // 現在の動作点ドット。
-    //  IN と OUT のピーク値は独立に減衰していて「同一瞬間の値」ではないため、
-    //  単純に (inputDb, outputDb) の十字を引くとカーブ表示からズレる。
-    //  そこで入力 dB からカーブの理論出力値を計算し、カーブ上に必ず乗るドットで示す。
+    // 現在の動作点ドット
     if (typeof inputDb === 'number' && inputDb > GRAPH_MIN_DB) {
       const outDbOnCurve = computeOutputDb(inputDb, thresholdDb, ratio, kneeDb) + makeupDb;
       const dotX = dbToX(inputDb, W);
       const dotY = dbToY(outDbOnCurve, H);
-      // 外周（視認性のためのハロ）
-      ctx.fillStyle = 'rgba(0,0,0,0.6)';
+
+      // 外周（グローハロ）
+      ctx.fillStyle = 'rgba(0, 210, 255, 0.3)';
       ctx.beginPath();
-      ctx.arc(dotX, dotY, 6, 0, Math.PI * 2);
+      ctx.arc(dotX, dotY, 7, 0, Math.PI * 2);
       ctx.fill();
-      // 本体（プライマリブルー）
-      ctx.fillStyle = '#4fc3f7';
+
+      // アウターリング（Neon Cyan）
+      ctx.fillStyle = '#00d2ff';
       ctx.beginPath();
-      ctx.arc(dotX, dotY, 4, 0, Math.PI * 2);
+      ctx.arc(dotX, dotY, 4.5, 0, Math.PI * 2);
+      ctx.fill();
+
+      // インナーコア（Pure White）
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath();
+      ctx.arc(dotX, dotY, 2, 0, Math.PI * 2);
       ctx.fill();
     }
 
@@ -176,13 +178,13 @@ export const RatioGraph: React.FC<RatioGraphProps> = ({
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
       <Box sx={{ height: 36, display: 'flex', alignItems: 'flex-end', justifyContent: 'center', pb: 0.25 }}>
-        <Typography variant='caption' sx={{ fontSize: '9px', color: 'text.secondary', fontWeight: 500, lineHeight: 1 }}>
+        <Typography variant='caption' sx={{ fontSize: '9px', color: '#94a3b8', fontWeight: 700, letterSpacing: '0.8px', lineHeight: 1 }}>
           CURVE
         </Typography>
       </Box>
       <canvas
         ref={canvasRef}
-        style={{ borderRadius: 4, border: '1px solid #333', width: W, height: H, display: 'block' }}
+        style={{ borderRadius: 6, border: '1px solid #222938', width: W, height: H, display: 'block' }}
       />
     </Box>
   );

@@ -419,7 +419,7 @@ ZeroCompAudioProcessorEditor::~ZeroCompAudioProcessorEditor()
 
 void ZeroCompAudioProcessorEditor::paint(juce::Graphics& g)
 {
-    g.fillAll(juce::Colour(0xFF606F77));
+    g.fillAll(juce::Colour(0xFF141721));
 }
 
 void ZeroCompAudioProcessorEditor::resized()
@@ -559,7 +559,7 @@ void ZeroCompAudioProcessorEditor::handleSystemAction(const juce::Array<juce::va
         if (action == "ready")
         {
             juce::DynamicObject::Ptr init{ new juce::DynamicObject{} };
-            init->setProperty("pluginName", "ZeroComp");
+            init->setProperty("pluginName", "Pressor2000");
             init->setProperty("version", ZEROCOMP_VERSION_STRING);
             completion(juce::var{ init.get() });
             return;

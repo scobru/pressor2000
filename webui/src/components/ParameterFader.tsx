@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// Copyright (C) 2026 Jun Murakami
+// Copyright (C) 2026 scobru
 import React, { useEffect, useEffectEvent, useRef, useState } from 'react';
 import { Box, Input, Slider, Typography } from '@mui/material';
-import { darken, lighten, styled } from '@mui/material/styles';
+import { styled } from '@mui/material/styles';
 import { useJuceSliderValue } from '../hooks/useJuceParam';
 import { useFineAdjustPointer } from '../hooks/useFineAdjustPointer';
 import { useNumberInputAdjust } from '../hooks/useNumberInputAdjust';
@@ -34,67 +34,61 @@ interface ParameterFaderProps {
   disabled?: boolean;
 }
 
-const StyledSlider = styled(Slider)(({ theme }) => {
-  const primaryMain = theme.palette.primary.main;
-  const primaryLight = theme.palette.primary.light || lighten(primaryMain, 0.2);
-  const primaryDark = theme.palette.primary.dark || darken(primaryMain, 0.2);
-  const trackGradient = `linear-gradient(180deg, ${lighten(primaryLight, 0.15)} 0%, ${primaryMain} 50%, ${darken(
-    primaryDark,
-    0.15,
-  )} 100%)`;
-  const thumbTop = lighten(primaryMain, 0.9);
-  const thumbMid1 = lighten(primaryMain, 0.6);
-  const thumbMid2 = lighten(primaryMain, 0.2);
-  const thumbBottom = darken(primaryMain, 0.2);
-  const thumbGradient = `linear-gradient(180deg, ${thumbTop} 0%, ${thumbMid1} 40%, ${thumbMid2} 60%, ${thumbBottom} 100%)`;
+const StyledSlider = styled(Slider)(() => {
+  const trackGradient = 'linear-gradient(180deg, #67e8f9 0%, #00d2ff 60%, #0284c7 100%)';
 
   return {
     '& .MuiSlider-rail': {
       width: 8,
-      borderRadius: 2,
-      backgroundColor: '#1a1a1a',
-      border: '1px solid #404040',
+      borderRadius: 4,
+      backgroundColor: '#0e121a',
+      border: '1px solid #222938',
       opacity: 1,
+      boxShadow: 'inset 0 1px 4px rgba(0,0,0,0.7)',
     },
     '& .MuiSlider-track': {
       width: 8,
-      borderRadius: 2,
+      borderRadius: 3,
       border: 'none',
       background: trackGradient,
+      boxShadow: '0 0 10px rgba(0, 210, 255, 0.45)',
     },
     '& .MuiSlider-thumb': {
-      width: 20,
+      width: 22,
       height: 28,
       borderRadius: 4,
-      background: thumbGradient,
-      border: '1px solid rgba(0,0,0,0.35)',
-      boxShadow: ['0 2px 4px rgba(0,0,0,0.45)', 'inset 0 1px 0 rgba(255,255,255,0.7)', 'inset 0 -2px 3px rgba(0,0,0,0.25)'].join(
-        ', ',
-      ),
+      background: 'linear-gradient(180deg, #2c3242 0%, #1e2430 50%, #121622 100%)',
+      border: '1px solid #3b4356',
+      boxShadow: '0 3px 8px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.25), inset 0 -1px 2px rgba(0,0,0,0.5)',
       overflow: 'hidden',
       boxSizing: 'border-box',
+      transition: 'border-color 0.15s ease, box-shadow 0.15s ease',
+      '&:hover, &.Mui-focusVisible': {
+        borderColor: '#00d2ff',
+        boxShadow: '0 0 12px rgba(0, 210, 255, 0.5), inset 0 1px 0 rgba(255,255,255,0.3)',
+      },
       '&::before': {
         content: '""',
         position: 'absolute',
         left: 2,
         right: 2,
-        top: 4,
-        height: 9,
-        borderRadius: 3,
-        background: 'linear-gradient(180deg, rgba(255,255,255,0.85) 0%, rgba(255,255,255,0.35) 60%, rgba(255,255,255,0) 100%)',
+        top: 2,
+        height: 8,
+        borderRadius: 2,
+        background: 'linear-gradient(180deg, rgba(255,255,255,0.4) 0%, rgba(255,255,255,0) 100%)',
         pointerEvents: 'none',
       },
+      // Center indicator line glowing in Electric Neon Cyan
       '&::after': {
         content: '""',
         position: 'absolute',
-        left: '20%',
-        right: '20%',
-        top: '34%',
-        bottom: '30%',
-        borderRadius: 2,
-        background:
-          'repeating-linear-gradient(180deg, rgba(0,0,0,0.35) 0 1px, rgba(255,255,255,0.38) 1px 2px, rgba(0,0,0,0) 2px 6px)',
-        boxShadow: '0 0 0 1px rgba(0,0,0,0.08) inset',
+        left: '15%',
+        right: '15%',
+        top: '48%',
+        height: 2.5,
+        borderRadius: 1,
+        background: '#00d2ff',
+        boxShadow: '0 0 6px #00d2ff',
         pointerEvents: 'none',
       },
     },
@@ -103,18 +97,20 @@ const StyledSlider = styled(Slider)(({ theme }) => {
 
 const StyledInput = styled(Input)(() => ({
   '& input': {
-    padding: '2px 3px',
+    padding: '2px 4px',
     fontSize: '12px',
     fontFamily: '"Red Hat Mono", monospace',
     textAlign: 'center',
-    width: '38px',
-    backgroundColor: '#252525',
-    color: 'text.primary',
-    border: '1px solid #404040',
-    borderRadius: 2,
+    width: '42px',
+    backgroundColor: '#0b0e14',
+    color: '#f8fafc',
+    border: '1px solid #222938',
+    borderRadius: 4,
+    transition: 'border-color 0.15s ease, box-shadow 0.15s ease',
     '&:focus': {
-      borderColor: '#4fc3f7',
-      backgroundColor: '#252525',
+      borderColor: '#00d2ff',
+      boxShadow: '0 0 8px rgba(0, 210, 255, 0.35)',
+      backgroundColor: '#0e121a',
       outline: 'none',
     },
   },
@@ -166,9 +162,6 @@ export const ParameterFader: React.FC<ParameterFaderProps> = ({
   const [inputText, setInputText] = useState<string>('');
   const [isDragging, setIsDragging] = useState(false);
 
-  // log スキュー時でも frontend-mirror は線形解釈で scaled 値を送る仕様。
-  //  そのため setNormalised(log正規化値) では JUCE 側の値がズレる。
-  //  setScaled(true_value, min, max) は線形正規化して送るので、log/linear どちらでも正しく往復する。
   const applyValue = (v: number) => {
     setScaled(v, min, max);
   };
@@ -176,9 +169,6 @@ export const ParameterFader: React.FC<ParameterFaderProps> = ({
   const formatted = formatValue ? formatValue(value) : value.toFixed(1);
   const displayInput = isEditing ? inputText : formatted;
 
-  // MUI Slider は 0..100 を下→上で描画する。inverted 時はこの軸を反転させる。
-  //  ユーザが見る "上" は常に「上にある値」として解釈されるように、
-  //   inverted=true のときは 上 = min, 下 = max にする。
   const sliderPosFromValue = (v: number): number => {
     const t = valueToNorm(v, min, max, skew);
     return (inverted ? 1 - t : t) * 100;
@@ -208,13 +198,6 @@ export const ParameterFader: React.FC<ParameterFaderProps> = ({
     if (e.key === 'Enter') (e.target as HTMLInputElement).blur();
   };
 
-  // 修飾キー + ポインタ操作：
-  //  Ctrl/Cmd + クリック      → defaultValue にリセット
-  //  (Ctrl/Cmd/Shift) + ドラッグ → 微調整モード（log/linear 両対応）
-  //  修飾キーなし              → MUI Slider の通常ドラッグに委譲
-  //
-  // MUI Slider の onMouseDown は内部で pointerdown を直接扱うため、capture 相 +
-  // stopImmediatePropagation で先取りしないと MUI に食われる。
   const fineDragStartRef = useRef<{ value: number; norm: number }>({ value: 0, norm: 0 });
   const handlePointerDownCapture = useFineAdjustPointer({
     orientation: 'vertical',
@@ -229,25 +212,18 @@ export const ParameterFader: React.FC<ParameterFaderProps> = ({
       sliderState?.sliderDragStarted();
     },
     onDragDelta: (deltaPx) => {
-      // vertical なので deltaPx は「上方向が正」。inverted 時は最大値を上に置くため反転させる。
       const signed = inverted ? -deltaPx : deltaPx;
       if (skew === 'log') {
-        // log 軸は正規化空間で動かす（1px = 0.003 norm）。全域 0..1 を 330px で横断。
         const nextNorm = fineDragStartRef.current.norm + signed * 0.003;
         applyValue(normToValue(nextNorm, min, max, skew));
       } else {
-        // linear は値空間で直接（1px = wheelStepFine）
         applyValue(fineDragStartRef.current.value + signed * wheelStepFine);
       }
     },
     onDragEnd: () => sliderState?.sliderDragEnded(),
   });
 
-  // wheel リスナーは effect 内で 1 回だけ登録し、最新 value/skew/min/max/inverted を
-  //  Effect Event 経由で読む（Latest Ref Pattern の置換）。依存配列は空にできる。
-  //  visualUp: ホイール上方向 = フェーダー本体が視覚的に上に動く方向。
   const applyWheel = useEffectEvent((visualUp: 1 | -1, fine: boolean) => {
-    // inverted のフェーダーでは上 = 小さい値なので、方向を反転させる。
     const direction = inverted ? -visualUp : visualUp;
     const step = fine ? wheelStepFine : wheelStep;
     if (skew === 'log') {
@@ -275,10 +251,6 @@ export const ParameterFader: React.FC<ParameterFaderProps> = ({
     };
   }, []);
 
-  // 数値入力欄のホイール / 縦ドラッグ
-  //   inverted フェーダー（RATIO など：上が min / 下が max）では、フェーダー操作の
-  //   視覚方向と値の増減が反転している。入力欄のホイール上 / 上方向ドラッグは
-  //   「フェーダーを上方向に動かしたとき」と同じ値の動きに揃える（= inverted 時は値が減る）。
   const inputElRef = useRef<HTMLInputElement | null>(null);
   const inputDragStartRef = useRef<{ value: number; norm: number }>({ value: 0, norm: 0 });
   useNumberInputAdjust(inputElRef, {
@@ -313,8 +285,6 @@ export const ParameterFader: React.FC<ParameterFaderProps> = ({
     onDragEnd: () => sliderState?.sliderDragEnded(),
   });
 
-  // Auto Makeup ON 時など、フェーダー本体だけ薄くして操作不可に。ラベルは通常表示のまま残す
-  //   （OUTPUT 等の色は状態を示す重要な情報なので、disabled でも維持）。
   const controlDimSx = disabled
     ? { opacity: 0.4, pointerEvents: 'none' as const, transition: 'opacity 120ms' }
     : { transition: 'opacity 120ms' };
@@ -333,11 +303,13 @@ export const ParameterFader: React.FC<ParameterFaderProps> = ({
         <Typography
           variant='caption'
           sx={{
-            fontWeight: 600,
-            fontSize: '0.68rem',
-            color: active ? 'primary.main' : 'text.secondary',
-            letterSpacing: '0.3px',
+            fontWeight: 700,
+            fontSize: '0.70rem',
+            color: active ? '#00d2ff' : 'text.secondary',
+            letterSpacing: '0.8px',
+            textTransform: 'uppercase',
             lineHeight: 1,
+            textShadow: active ? '0 0 8px rgba(0, 210, 255, 0.4)' : 'none',
           }}
         >
           {label}
@@ -381,7 +353,7 @@ export const ParameterFader: React.FC<ParameterFaderProps> = ({
               sx={{
                 position: 'absolute',
                 top: 0,
-                left: 'calc(50% + 16px)',
+                left: 'calc(50% + 18px)',
                 height: SLIDER_HEIGHT,
                 display: 'flex',
                 flexDirection: 'column',
@@ -396,7 +368,8 @@ export const ParameterFader: React.FC<ParameterFaderProps> = ({
                     bottom: `${sliderPosFromValue(mark.value)}%`,
                     transform: 'translateY(50%)',
                     fontSize: '9px',
-                    color: 'text.primary',
+                    color: '#94a3b8',
+                    fontFamily: '"Red Hat Mono", monospace',
                     lineHeight: 1,
                     userSelect: 'none',
                     width: '100%',
@@ -423,7 +396,7 @@ export const ParameterFader: React.FC<ParameterFaderProps> = ({
           disableUnderline
         />
         {suffix && (
-          <Typography variant='caption' sx={{ ml: 0.25, fontSize: '10px', color: 'text.secondary' }}>
+          <Typography variant='caption' sx={{ ml: 0.25, fontSize: '10px', color: 'text.secondary', fontWeight: 600 }}>
             {suffix}
           </Typography>
         )}

@@ -1,11 +1,9 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// Copyright (C) 2026 Jun Murakami
+// Copyright (C) 2026 scobru
 import React, { useLayoutEffect, useRef } from 'react';
 import { Box, Typography } from '@mui/material';
 
 // メーター描画定数
-//  レンジは Threshold/Output フェーダー・GR メーターと揃えて 0..-30 dB。
-//  中点(-15)に設定して VISUAL_EXPONENT=1 の線形マッピングになる（GR と視覚的に揃う）。
 const METER_HEIGHT = 160;
 const DEFAULT_BAR_WIDTH = 24;
 const MIN_DB = -30;
@@ -56,23 +54,22 @@ export const LevelMeterBar: React.FC<{ level: number; label: string; width?: num
     const dpr = Math.max(1, window.devicePixelRatio || 1);
 
     ctx.clearRect(0, 0, cssW, cssH);
-    ctx.fillStyle = '#333';
+    // Deep dark background matching Spectra Denoiser
+    ctx.fillStyle = '#0b0e14';
     ctx.fillRect(0, 0, cssW, cssH);
 
     const grad = ctx.createLinearGradient(0, cssH, 0, 0);
-    grad.addColorStop(0, '#4fc3f7');
-    grad.addColorStop(0.6, '#4fc3f7');
-    grad.addColorStop(0.8, '#ffeb3b');
-    grad.addColorStop(1, '#ff5252');
+    grad.addColorStop(0, '#00d2ff');
+    grad.addColorStop(0.68, '#00d2ff');
+    grad.addColorStop(0.85, '#ff9f1c');
+    grad.addColorStop(1, '#ef4444');
 
     const clamped = Math.max(MIN_DB, Math.min(0, level));
     const yTop = dbToY(clamped, cssH);
     ctx.fillStyle = grad;
     ctx.fillRect(0, yTop, cssW, cssH - yTop);
 
-    // GR メーターと同じ目盛り値（0 と最下端を省いた中間値）を、
-    //  左側のみ短い線で引く。
-    ctx.strokeStyle = '#666';
+    ctx.strokeStyle = '#222938';
     ctx.lineWidth = 0.5;
     [-3, -6, -9, -12, -18, -24].forEach((db) => {
       const y = dbToY(db, cssH);
@@ -87,7 +84,7 @@ export const LevelMeterBar: React.FC<{ level: number; label: string; width?: num
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
       <Box sx={{ height: 36, display: 'flex', alignItems: 'flex-end', justifyContent: 'center', pb: 0.25 }}>
-        <Typography variant='caption' sx={{ fontSize: '9px', color: 'text.secondary', fontWeight: 500, lineHeight: 1 }}>
+        <Typography variant='caption' sx={{ fontSize: '9px', color: '#94a3b8', fontWeight: 700, letterSpacing: '0.8px', lineHeight: 1 }}>
           {label}
         </Typography>
       </Box>
@@ -95,7 +92,7 @@ export const LevelMeterBar: React.FC<{ level: number; label: string; width?: num
         ref={canvasRef}
         width={cssW}
         height={cssH}
-        style={{ borderRadius: 2, border: '1px solid #333', width: cssW, height: cssH }}
+        style={{ borderRadius: 4, border: '1px solid #222938', width: cssW, height: cssH }}
       />
     </Box>
   );
@@ -104,8 +101,7 @@ export const LevelMeterBar: React.FC<{ level: number; label: string; width?: num
 // ============================
 // GR メーター（上=0dB、下方向にリダクション量）
 // ============================
-//  Threshold/Output フェーダーのスケールに合わせて 0..-30 dB 範囲で描画。
-const GR_MAX_DB = 30; // 表示上限（フェーダー側と揃える）
+const GR_MAX_DB = 30;
 const grToUnit = (grDb: number): number => Math.max(0, Math.min(1, grDb / GR_MAX_DB));
 
 export const GainReductionMeterBar: React.FC<{ grDb: number; width?: number; height?: number; compact?: boolean }> = ({
@@ -126,24 +122,22 @@ export const GainReductionMeterBar: React.FC<{ grDb: number; width?: number; hei
     const dpr = Math.max(1, window.devicePixelRatio || 1);
 
     ctx.clearRect(0, 0, cssW, cssH);
-    ctx.fillStyle = '#333';
+    ctx.fillStyle = '#0b0e14';
     ctx.fillRect(0, 0, cssW, cssH);
 
     const u = grToUnit(grDb);
     const barHeight = u * cssH;
-    // GR バーは上から下へ伸びる（上端 = 0 dB GR、下端 = 最大 GR）。
-    //  バーが長いほど = 圧縮量が大きいほど赤が自然なので、上端オレンジ → 下端赤の 2 ストップ リニア。
+    // GR is warm amber to red
     const grad = ctx.createLinearGradient(0, 0, 0, cssH);
-    grad.addColorStop(0, '#ffab00'); // 上端（浅い圧縮側） = オレンジ
-    grad.addColorStop(1, '#ff5252'); // 下端（深い圧縮側） = 赤
+    grad.addColorStop(0, '#ff9f1c');
+    grad.addColorStop(0.65, '#f97316');
+    grad.addColorStop(1, '#ef4444');
 
     ctx.fillStyle = grad;
     ctx.fillRect(0, 0, cssW, barHeight);
 
-    // compact: Waveform モードの細い GR バー用。ラベル省略、左端から短いチックのみ。
-    // 通常: 数値の両脇に水平線を引く。0 と -30 は省略。
     if (compact) {
-      ctx.strokeStyle = 'rgba(255,255,255,0.22)';
+      ctx.strokeStyle = 'rgba(255,255,255,0.18)';
       ctx.lineWidth = 0.5;
       [3, 6, 9, 12, 18, 24].forEach((db) => {
         const y = grToUnit(db) * cssH;
@@ -154,10 +148,10 @@ export const GainReductionMeterBar: React.FC<{ grDb: number; width?: number; hei
         ctx.stroke();
       });
     } else {
-      ctx.font = '9px sans-serif';
-      const tickColor = 'rgba(255,255,255,0.28)';
+      ctx.font = '9px "Red Hat Mono", monospace';
+      const tickColor = 'rgba(148, 163, 184, 0.5)';
       ctx.fillStyle = tickColor;
-      ctx.strokeStyle = tickColor;
+      ctx.strokeStyle = '#222938';
       ctx.lineWidth = 1;
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
@@ -186,7 +180,7 @@ export const GainReductionMeterBar: React.FC<{ grDb: number; width?: number; hei
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
       <Box sx={{ height: 36, display: 'flex', alignItems: 'flex-end', justifyContent: 'center', pb: 0.25 }}>
-        <Typography variant='caption' sx={{ fontSize: '9px', color: 'text.secondary', fontWeight: 500, lineHeight: 1 }}>
+        <Typography variant='caption' sx={{ fontSize: '9px', color: '#ff9f1c', fontWeight: 700, letterSpacing: '0.8px', lineHeight: 1 }}>
           GR
         </Typography>
       </Box>
@@ -194,17 +188,15 @@ export const GainReductionMeterBar: React.FC<{ grDb: number; width?: number; hei
         ref={canvasRef}
         width={cssW}
         height={cssH}
-        style={{ borderRadius: 2, border: '1px solid #333', width: cssW, height: cssH }}
+        style={{ borderRadius: 4, border: '1px solid #222938', width: cssW, height: cssH }}
       />
     </Box>
   );
 };
 
-
 // ============================
 // ラウドネス（Momentary LKFS）メーター
 // ============================
-//  単一バーで -60..0 LKFS を非線形スケール（dbToUnit と同じ視覚カーブ）
 const LOUDNESS_MIN_LKFS = -60;
 
 const lkfsToUnit = (lkfs: number): number => {
@@ -232,21 +224,21 @@ export const LoudnessMeterBar: React.FC<{ lkfs: number; width?: number; height?:
     const dpr = Math.max(1, window.devicePixelRatio || 1);
 
     ctx.clearRect(0, 0, cssW, cssH);
-    ctx.fillStyle = '#333';
+    ctx.fillStyle = '#0b0e14';
     ctx.fillRect(0, 0, cssW, cssH);
 
     const grad = ctx.createLinearGradient(0, cssH, 0, 0);
-    grad.addColorStop(0, '#4fc3f7');
-    grad.addColorStop(0.6, '#4fc3f7');
-    grad.addColorStop(0.8, '#ffeb3b');
-    grad.addColorStop(1, '#ff5252');
+    grad.addColorStop(0, '#00d2ff');
+    grad.addColorStop(0.68, '#00d2ff');
+    grad.addColorStop(0.85, '#ff9f1c');
+    grad.addColorStop(1, '#ef4444');
 
     const clamped = Math.max(LOUDNESS_MIN_LKFS, Math.min(0, lkfs));
     const yTop = lkfsToY(clamped, cssH);
     ctx.fillStyle = grad;
     ctx.fillRect(0, yTop, cssW, cssH - yTop);
 
-    ctx.strokeStyle = '#666';
+    ctx.strokeStyle = '#222938';
     ctx.lineWidth = 0.5;
     [0, -6, -12, -18, -24, -30, -40, -50, -60].forEach((lk) => {
       const y = lkfsToY(lk, cssH);
@@ -260,9 +252,8 @@ export const LoudnessMeterBar: React.FC<{ lkfs: number; width?: number; height?:
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-      {/* Momentary モードは 1 段ラベル。下端に寄せてメーターにくっつける。 */}
       <Box sx={{ height: 36, display: 'flex', alignItems: 'flex-end', justifyContent: 'center', pb: 0.25 }}>
-        <Typography variant='caption' sx={{ fontSize: '9px', color: 'text.secondary', fontWeight: 500, lineHeight: 1 }}>
+        <Typography variant='caption' sx={{ fontSize: '9px', color: '#94a3b8', fontWeight: 700, letterSpacing: '0.8px', lineHeight: 1 }}>
           {label ?? 'LKFS'}
         </Typography>
       </Box>
@@ -270,10 +261,8 @@ export const LoudnessMeterBar: React.FC<{ lkfs: number; width?: number; height?:
         ref={canvasRef}
         width={cssW}
         height={cssH}
-        style={{ borderRadius: 2, border: '1px solid #333', width: cssW, height: cssH }}
+        style={{ borderRadius: 4, border: '1px solid #222938', width: cssW, height: cssH }}
       />
     </Box>
   );
 };
-
-// 数値フォーマッタ（formatDb / formatLkfs）は Fast Refresh 制約により ./meterFormat へ分離。

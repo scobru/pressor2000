@@ -1,25 +1,25 @@
-# ZeroComp - ゼロレイテンシー・ブロードキャスト用リミッター
-# JUCE + WebView（Vite/React/MUI）構成
+# Pressor2000 - Studio Compressor with Vintage Character & Real-time Visualization
+# JUCE + WebView (Vite/React/MUI)
 
 cmake_minimum_required(VERSION 3.22)
 
-# macOS の最小対応バージョンを明示
+# macOS deployment target
 if(APPLE)
-    set(ZEROCOMP_MIN_MACOS "10.15")
+    set(PRESSOR2000_MIN_MACOS "10.15")
     if(NOT CMAKE_OSX_DEPLOYMENT_TARGET)
-        set(CMAKE_OSX_DEPLOYMENT_TARGET "${ZEROCOMP_MIN_MACOS}" CACHE STRING "Minimum supported macOS version" FORCE)
-    elseif(CMAKE_OSX_DEPLOYMENT_TARGET VERSION_GREATER ZEROCOMP_MIN_MACOS)
-        message(STATUS "Overriding CMAKE_OSX_DEPLOYMENT_TARGET (${CMAKE_OSX_DEPLOYMENT_TARGET}) -> ${ZEROCOMP_MIN_MACOS}")
-        set(CMAKE_OSX_DEPLOYMENT_TARGET "${ZEROCOMP_MIN_MACOS}" CACHE STRING "Minimum supported macOS version" FORCE)
+        set(CMAKE_OSX_DEPLOYMENT_TARGET "${PRESSOR2000_MIN_MACOS}" CACHE STRING "Minimum supported macOS version" FORCE)
+    elseif(CMAKE_OSX_DEPLOYMENT_TARGET VERSION_GREATER PRESSOR2000_MIN_MACOS)
+        message(STATUS "Overriding CMAKE_OSX_DEPLOYMENT_TARGET (${CMAKE_OSX_DEPLOYMENT_TARGET}) -> ${PRESSOR2000_MIN_MACOS}")
+        set(CMAKE_OSX_DEPLOYMENT_TARGET "${PRESSOR2000_MIN_MACOS}" CACHE STRING "Minimum supported macOS version" FORCE)
     endif()
     message(STATUS "macOS deployment target: ${CMAKE_OSX_DEPLOYMENT_TARGET}")
 endif()
 
-# バージョン情報を読み込む
+# Read version information
 include(${CMAKE_SOURCE_DIR}/cmake/Version.cmake)
 
-# プロジェクト定義
-project(ZeroComp VERSION ${PROJECT_VERSION})
+# Project definition
+project(Pressor2000 VERSION ${PROJECT_VERSION})
 
 # C++17標準を使用
 set(CMAKE_CXX_STANDARD 17)
@@ -114,7 +114,7 @@ if(WIN32)
 endif()
 
 message(STATUS "")
-message(STATUS "ZeroComp Configuration:")
+message(STATUS "Pressor2000 Configuration:")
 message(STATUS "  Version: ${PROJECT_VERSION}")
 message(STATUS "  Build Type: ${CMAKE_BUILD_TYPE}")
 message(STATUS "  C++ Standard: ${CMAKE_CXX_STANDARD}")
@@ -128,7 +128,7 @@ else()
 endif()
 message(STATUS "")
 message(STATUS "Available targets:")
-message(STATUS "  ZeroComp          - Build the main plugin")
+message(STATUS "  Pressor2000       - Build the main plugin")
 message(STATUS "  webui_install      - Install WebUI dependencies")
 message(STATUS "  webui_dev          - Start WebUI development server")
 message(STATUS "  webui_build        - Build WebUI for production")

@@ -1,10 +1,10 @@
-; ZeroComp Installer Script for Inno Setup
+; Pressor2000 Installer Script for Inno Setup
 ; Requires Inno Setup 6.3.0 or later (for dark mode support)
 
-#define MyAppName "ZeroComp"
-#define MyAppPublisher "Jun Murakami"
-#define MyAppURL "https://jun-murakami.web.app"
-#define MyAppExeName "ZeroComp.exe"
+#define MyAppName "Pressor2000"
+#define MyAppPublisher "scobru"
+#define MyAppURL "https://github.com/scobru/pressor2000"
+#define MyAppExeName "Pressor2000.exe"
 
 ; Version is read from VERSION file during build
 #ifndef MyAppVersion
@@ -24,7 +24,7 @@ DefaultGroupName={#MyAppName}
 AllowNoIcons=yes
 LicenseFile=LICENSE
 OutputDir=releases\{#MyAppVersion}
-OutputBaseFilename=ZeroComp_{#MyAppVersion}_Windows_Setup
+OutputBaseFilename=Pressor2000_{#MyAppVersion}_Windows_Setup
 SetupIconFile=cmake\icon.ico
 UninstallDisplayIcon={uninstallexe}
 Compression=lzma2
@@ -59,18 +59,17 @@ Name: "quicklaunchicon"; Description: "{cm:CreateQuickLaunchIcon}"; GroupDescrip
 
 [Files]
 ; Standalone Application
-Source: "build\plugin\ZeroComp_artefacts\Release\Standalone\ZeroComp.exe"; DestDir: "{code:GetStandalonePath}"; Flags: ignoreversion; Components: standalone
-Source: "build\plugin\ZeroComp_artefacts\Release\Standalone\*.dll"; DestDir: "{code:GetStandalonePath}"; Flags: ignoreversion skipifsourcedoesntexist; Components: standalone
+Source: "build\plugin\Pressor2000_artefacts\Release\Standalone\Pressor2000.exe"; DestDir: "{code:GetStandalonePath}"; Flags: ignoreversion; Components: standalone
+Source: "build\plugin\Pressor2000_artefacts\Release\Standalone\*.dll"; DestDir: "{code:GetStandalonePath}"; Flags: ignoreversion skipifsourcedoesntexist; Components: standalone
 
 ; VST3 Plugin
-Source: "build\plugin\ZeroComp_artefacts\Release\VST3\ZeroComp.vst3\*"; DestDir: "{code:GetVST3Path}\ZeroComp.vst3"; Flags: ignoreversion recursesubdirs createallsubdirs; Components: vst3
+Source: "build\plugin\Pressor2000_artefacts\Release\VST3\Pressor2000.vst3\*"; DestDir: "{code:GetVST3Path}\Pressor2000.vst3"; Flags: ignoreversion recursesubdirs createallsubdirs; Components: vst3
 
 ; CLAP Plugin — 単一ファイル（.clap = DLL に拡張子を付けたもの）
-Source: "releases\{#MyAppVersion}\Windows\ZeroComp.clap"; DestDir: "{code:GetCLAPPath}"; Flags: ignoreversion; Components: clap
+Source: "releases\{#MyAppVersion}\Windows\Pressor2000.clap"; DestDir: "{code:GetCLAPPath}"; Flags: ignoreversion; Components: clap
 
-; AAX Plugin — バンドル全体を丸ごとコピー（入れ子は PrepareToInstall で事前削除により防止）
-Source: "releases\{#MyAppVersion}\Windows\ZeroComp.aaxplugin\*"; DestDir: "{code:GetAAXPath}\ZeroComp.aaxplugin"; Flags: ignoreversion recursesubdirs createallsubdirs; Components: aax
-
+; AAX Plugin — バンドル全体を丸ごとコピー
+Source: "releases\{#MyAppVersion}\Windows\Pressor2000.aaxplugin\*"; DestDir: "{code:GetAAXPath}\Pressor2000.aaxplugin"; Flags: ignoreversion recursesubdirs createallsubdirs; Components: aax
 
 ; License and Documentation (install to standalone path if selected, otherwise to program files)
 Source: "LICENSE"; DestDir: "{code:GetDocPath}"; Flags: ignoreversion
@@ -94,18 +93,18 @@ Filename: "{tmp}\vc_redist.x64.exe"; Parameters: "/quiet /norestart"; StatusMsg:
 ; Clean up any generated files
 Type: filesandordirs; Name: "{code:GetStandalonePath}\logs"
 Type: filesandordirs; Name: "{code:GetStandalonePath}\presets"
-Type: filesandordirs; Name: "{localappdata}\ZeroComp"
-Type: filesandordirs; Name: "{userappdata}\ZeroComp"
+Type: filesandordirs; Name: "{localappdata}\Pressor2000"
+Type: filesandordirs; Name: "{userappdata}\Pressor2000"
 
 [Registry]
 ; Register VST3 plugin location
-Root: HKLM64; Subkey: "Software\VST3"; ValueType: string; ValueName: "ZeroComp"; ValueData: "{code:GetVST3Path}\ZeroComp.vst3"; Flags: uninsdeletevalue; Components: vst3
+Root: HKLM64; Subkey: "Software\VST3"; ValueType: string; ValueName: "Pressor2000"; ValueData: "{code:GetVST3Path}\Pressor2000.vst3"; Flags: uninsdeletevalue; Components: vst3
 
-; Register CLAP plugin location（CLAP 規約に厳密なレジストリ要件は無いが、参照用に同じパターンで残す）
-Root: HKLM64; Subkey: "Software\CLAP"; ValueType: string; ValueName: "ZeroComp"; ValueData: "{code:GetCLAPPath}\ZeroComp.clap"; Flags: uninsdeletevalue; Components: clap
+; Register CLAP plugin location
+Root: HKLM64; Subkey: "Software\CLAP"; ValueType: string; ValueName: "Pressor2000"; ValueData: "{code:GetCLAPPath}\Pressor2000.clap"; Flags: uninsdeletevalue; Components: clap
 
 ; Register AAX plugin location
-Root: HKLM64; Subkey: "Software\Avid\ProTools\AAX"; ValueType: string; ValueName: "ZeroComp"; ValueData: "{code:GetAAXPath}\ZeroComp.aaxplugin"; Flags: uninsdeletevalue; Components: aax
+Root: HKLM64; Subkey: "Software\Avid\ProTools\AAX"; ValueType: string; ValueName: "Pressor2000"; ValueData: "{code:GetAAXPath}\Pressor2000.aaxplugin"; Flags: uninsdeletevalue; Components: aax
 
 [Code]
 var
@@ -168,7 +167,7 @@ begin
 
   // Add input fields for each component
   PathSelectionPage.Add('Standalone Application:');
-  PathSelectionPage.Values[0] := ExpandConstant('{autopf}\ZeroComp');
+  PathSelectionPage.Values[0] := ExpandConstant('{autopf}\Pressor2000');
 
   PathSelectionPage.Add('VST3 Plugin:');
   PathSelectionPage.Values[1] := ExpandConstant('{commoncf64}\VST3');
@@ -237,7 +236,7 @@ begin
     begin
       if MsgBox('Microsoft Visual C++ Redistributables are required but not installed.' + #13#10 + #13#10 +
                 'Would you like to download and install them now?' + #13#10 +
-                '(Required for ZeroComp to run properly)', mbConfirmation, MB_YESNO) = IDYES then
+                '(Required for Pressor2000 to run properly)', mbConfirmation, MB_YESNO) = IDYES then
       begin
         DownloadPage.Clear;
         DownloadPage.Add('https://aka.ms/vs/17/release/vc_redist.x64.exe', 'vc_redist.x64.exe', '');
@@ -247,7 +246,7 @@ begin
           Result := True;
         except
           MsgBox('Failed to download Visual C++ Redistributables.' + #13#10 +
-                 'ZeroComp may not work properly without them.' + #13#10 + #13#10 +
+                 'Pressor2000 may not work properly without them.' + #13#10 + #13#10 +
                  'You can download them manually from:' + #13#10 +
                  'https://aka.ms/vs/17/release/vc_redist.x64.exe', mbError, MB_OK);
           Result := True; // Continue installation anyway
@@ -255,7 +254,7 @@ begin
       end
       else
       begin
-        MsgBox('Warning: ZeroComp may not work without Visual C++ Redistributables.' + #13#10 + #13#10 +
+        MsgBox('Warning: Pressor2000 may not work without Visual C++ Redistributables.' + #13#10 + #13#10 +
                'You can download them later from:' + #13#10 +
                'https://aka.ms/vs/17/release/vc_redist.x64.exe', mbInformation, MB_OK);
       end;
@@ -285,7 +284,7 @@ begin
     else
       TargetPath := ExpandConstant('{commoncf64}\VST3');
 
-    TestFile := TargetPath + '\ZeroComp.vst3\Contents\x86_64-win\ZeroComp.vst3';
+    TestFile := TargetPath + '\Pressor2000.vst3\Contents\x86_64-win\Pressor2000.vst3';
     if FileExists(TestFile) then
     begin
       FileLocked := not DeleteFile(TestFile);
@@ -293,7 +292,7 @@ begin
       begin
         Log('VST3 plugin appears to be in use (file locked)');
         if MsgBox('The VST3 plugin appears to be in use by a DAW.' + #13#10 + #13#10 +
-                  'Please close any DAW that might be using ZeroComp and try again.' + #13#10 + #13#10 +
+                  'Please close any DAW that might be using Pressor2000 and try again.' + #13#10 + #13#10 +
                   'Continue anyway? (Installation may fail)', mbConfirmation, MB_YESNO) = IDNO then
         begin
           Result := 'Plugin files are locked. Please close your DAW and try again.';
@@ -311,7 +310,7 @@ begin
     else
       TargetPath := ExpandConstant('{commoncf64}\CLAP');
 
-    TestFile := TargetPath + '\ZeroComp.clap';
+    TestFile := TargetPath + '\Pressor2000.clap';
     if FileExists(TestFile) then
     begin
       FileLocked := not DeleteFile(TestFile);
@@ -319,7 +318,7 @@ begin
       begin
         Log('CLAP plugin appears to be in use (file locked)');
         if MsgBox('The CLAP plugin appears to be in use by a DAW.' + #13#10 + #13#10 +
-                  'Please close any DAW that might be using ZeroComp and try again.' + #13#10 + #13#10 +
+                  'Please close any DAW that might be using Pressor2000 and try again.' + #13#10 + #13#10 +
                   'Continue anyway? (Installation may fail)', mbConfirmation, MB_YESNO) = IDNO then
         begin
           Result := 'Plugin files are locked. Please close your DAW and try again.';
@@ -338,11 +337,10 @@ begin
     else
       TargetPath := ExpandConstant('{commoncf64}\Avid\Audio\Plug-Ins');
 
-    // 既存の AAX バンドルを丸ごと削除してからインストール（入れ子防止）
-    if DirExists(TargetPath + '\ZeroComp.aaxplugin') then
+    if DirExists(TargetPath + '\Pressor2000.aaxplugin') then
     begin
       Log('Removing existing AAX bundle to avoid nested installation');
-      if not DelTree(TargetPath + '\ZeroComp.aaxplugin', True, True, True) then
+      if not DelTree(TargetPath + '\Pressor2000.aaxplugin', True, True, True) then
       begin
         Log('Failed to remove existing AAX bundle (possibly in use)');
         if MsgBox('The AAX plugin appears to be in use by Pro Tools.' + #13#10 + #13#10 +
@@ -363,20 +361,20 @@ begin
     if StandalonePath <> '' then
       TargetPath := StandalonePath
     else
-      TargetPath := ExpandConstant('{autopf}\ZeroComp');
+      TargetPath := ExpandConstant('{autopf}\Pressor2000');
 
-    TestFile := TargetPath + '\ZeroComp.exe';
+    TestFile := TargetPath + '\Pressor2000.exe';
     if FileExists(TestFile) then
     begin
       FileLocked := not DeleteFile(TestFile);
       if FileLocked then
       begin
         Log('Standalone application appears to be running');
-        if MsgBox('ZeroComp standalone application appears to be running.' + #13#10 + #13#10 +
+        if MsgBox('Pressor2000 standalone application appears to be running.' + #13#10 + #13#10 +
                   'Please close it and try again.' + #13#10 + #13#10 +
                   'Continue anyway? (Installation may fail)', mbConfirmation, MB_YESNO) = IDNO then
         begin
-          Result := 'ZeroComp.exe is running. Please close it and try again.';
+          Result := 'Pressor2000.exe is running. Please close it and try again.';
           Exit;
         end;
       end;
@@ -398,7 +396,7 @@ end;
 function GetStandalonePath(Param: String): String;
 begin
   if StandalonePath = '' then
-    Result := ExpandConstant('{autopf}\ZeroComp')
+    Result := ExpandConstant('{autopf}\Pressor2000')
   else
     Result := StandalonePath;
 end;
@@ -433,12 +431,12 @@ begin
   if IsComponentSelected('standalone') then
     Result := GetStandalonePath('')
   else
-    Result := ExpandConstant('{autopf}\ZeroComp');
+    Result := ExpandConstant('{autopf}\Pressor2000');
 end;
 
 procedure DeinitializeUninstall();
 begin
   // Clean up any remaining files
-  DelTree(ExpandConstant('{localappdata}\ZeroComp'), True, True, True);
-  DelTree(ExpandConstant('{userappdata}\ZeroComp'), True, True, True);
+  DelTree(ExpandConstant('{localappdata}\Pressor2000'), True, True, True);
+  DelTree(ExpandConstant('{userappdata}\Pressor2000'), True, True, True);
 end;

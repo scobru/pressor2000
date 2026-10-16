@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// Copyright (C) 2026 Jun Murakami
+// Copyright (C) 2026 scobru
 import React from 'react';
 import {
   Box,
@@ -21,9 +21,6 @@ import {
 import { DISPLAY_VERSION } from '../version';
 import { openUrl } from '../bridge/juce';
 
-// license-checker が prebuild で生成する JSON を静的取り込み
-// - 形式: Record<"pkg@version", { licenses, publisher, repository, url, ... }>
-// - 初回は空 {} が入る想定
 import licensesRaw from '../assets/licenses.json';
 
 type LicenseCheckerEntry = {
@@ -37,7 +34,6 @@ type LicensesMap = Record<string, LicenseCheckerEntry>;
 
 function mapToRows(data: LicensesMap) {
   return Object.entries(data).map(([pkgAndVersion, info]) => {
-    // 最後の '@' をバージョン境界としてパース（scoped package 対応）
     const at = pkgAndVersion.lastIndexOf('@');
     const name = at > 0 ? pkgAndVersion.slice(0, at) : pkgAndVersion;
     const version = at > 0 ? pkgAndVersion.slice(at + 1) : '';
@@ -58,16 +54,10 @@ export interface LicenseDialogProps {
   onClose: () => void;
 }
 
-// ライセンスダイアログ（ヘッダーとテーブルを統合）
-// - ダイアログ領域は縦フレックス
-// - 上部のタイトル/クレジットは固定
-// - 下部のテーブル領域のみ左右上下スクロール可能
 export const LicenseDialog: React.FC<LicenseDialogProps> = ({ open, onClose }) => {
-  // unknown として取り込んだ JSON を期待型へナローイング
   const data: LicensesMap = licensesRaw as unknown as LicensesMap;
   const rows = React.useMemo(() => mapToRows(data), [data]);
 
-  // リンククリックハンドラー（OSのブラウザで開く）
   const handleLinkClick = (event: React.MouseEvent<HTMLAnchorElement>, url: string) => {
     event.preventDefault();
     openUrl(url);
@@ -84,100 +74,98 @@ export const LicenseDialog: React.FC<LicenseDialogProps> = ({ open, onClose }) =
             maxHeight: '85vh',
             display: 'flex',
             flexDirection: 'column',
+            backgroundColor: '#12151f',
+            border: '1px solid #222938',
+            borderRadius: 2,
+            boxShadow: '0 12px 40px rgba(0, 0, 0, 0.8)',
           },
         },
       }}
     >
-      <DialogContent sx={{ fontSize: '0.80rem', display: 'flex', flexDirection: 'column', gap: 1, flex: 1, minHeight: 0, p: 2 }}>
-        {/* 見出し（中央寄せ）、その下にバージョン/クレジット */}
+      <DialogContent sx={{ fontSize: '0.80rem', display: 'flex', flexDirection: 'column', gap: 1, flex: 1, minHeight: 0, p: 2.5 }}>
         <Box sx={{ textAlign: 'center', py: 0.5 }}>
-          <Typography variant='h6' sx={{ fontWeight: 700, letterSpacing: 0.3, fontSize: '1.25rem' }}>
-            ZeroComp
+          <Typography variant='h6' sx={{ fontWeight: 800, letterSpacing: '1px', fontSize: '1.35rem', color: '#00d2ff', textShadow: '0 0 12px rgba(0, 210, 255, 0.4)' }}>
+            PRESSOR 2000
           </Typography>
-          <Typography variant='caption' color='text.secondary' sx={{ fontSize: '0.72rem' }}>
+          <Typography variant='caption' sx={{ fontSize: '0.72rem', color: '#94a3b8', fontWeight: 600 }}>
             v{DISPLAY_VERSION}
           </Typography>
-          <Typography variant='body2' sx={{ mt: 0.5, fontSize: '0.80rem' }}>
-            Developed by{' '}
+          <Typography variant='body2' sx={{ mt: 0.5, fontSize: '0.82rem', color: '#f8fafc' }}>
+            Maintained by{' '}
             <MuiLink
-              href='https://jun-murakami.web.app/'
-              onClick={(e) => handleLinkClick(e, 'https://jun-murakami.web.app/')}
-              sx={{ cursor: 'pointer' }}
+              href='https://github.com/scobru'
+              onClick={(e) => handleLinkClick(e, 'https://github.com/scobru')}
+              sx={{ cursor: 'pointer', color: '#00d2ff', fontWeight: 600 }}
             >
-              Jun Murakami
+              scobru
             </MuiLink>
           </Typography>
-          <Typography variant='body2' color='text.secondary' sx={{ fontSize: '0.78rem' }}>
-            Made with JUCE
+          <Typography variant='body2' sx={{ fontSize: '0.78rem', color: '#94a3b8' }}>
+            Built with JUCE 8 • Ultra Low Latency DSP
           </Typography>
-          <Typography variant='caption' color='text.secondary' sx={{ display: 'block', mt: 0.75, fontSize: '0.70rem' }}>
+          <Typography variant='caption' sx={{ display: 'block', mt: 0.75, fontSize: '0.72rem', color: '#64748b' }}>
             Licensed under{' '}
             <MuiLink
               href='https://www.gnu.org/licenses/agpl-3.0.html'
               onClick={(e) => handleLinkClick(e, 'https://www.gnu.org/licenses/agpl-3.0.html')}
-              sx={{ cursor: 'pointer' }}
+              sx={{ cursor: 'pointer', color: '#00d2ff' }}
             >
               GNU AGPLv3 or later
             </MuiLink>
             {' — '}
             <MuiLink
-              href='https://github.com/Jun-Murakami/ZeroComp'
-              onClick={(e) => handleLinkClick(e, 'https://github.com/Jun-Murakami/ZeroComp')}
-              sx={{ cursor: 'pointer' }}
+              href='https://github.com/scobru/pressor2000'
+              onClick={(e) => handleLinkClick(e, 'https://github.com/scobru/pressor2000')}
+              sx={{ cursor: 'pointer', color: '#00d2ff' }}
             >
               Source on GitHub
             </MuiLink>
           </Typography>
-          <Typography variant='caption' color='text.secondary' sx={{ display: 'block', mt: 0.5, fontSize: '0.66rem', lineHeight: 1.35, fontStyle: 'italic', maxWidth: 480, mx: 'auto' }}>
+          <Typography variant='caption' sx={{ display: 'block', mt: 0.5, fontSize: '0.66rem', lineHeight: 1.35, fontStyle: 'italic', maxWidth: 480, mx: 'auto', color: '#64748b' }}>
             This program is distributed WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
           </Typography>
         </Box>
 
-        <Divider sx={{ my: 0.5 }} />
+        <Divider sx={{ my: 0.5, borderColor: '#222938' }} />
 
-        {/* Core SDK / Libraries */}
-        <Typography variant='subtitle2' sx={{ fontWeight: 600, fontSize: '0.80rem' }}>
+        <Typography variant='subtitle2' sx={{ fontWeight: 700, fontSize: '0.78rem', color: '#94a3b8', letterSpacing: '0.5px', textTransform: 'uppercase' }}>
           Core Libraries
         </Typography>
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.25, pl: 1, mb: 0.5 }}>
           {[
             { name: 'JUCE', license: 'AGPLv3 / Commercial', url: 'https://juce.com/' },
             { name: 'VST3 SDK', license: 'MIT', url: 'https://github.com/steinbergmedia/vst3sdk' },
+            { name: 'CLAP SDK', license: 'MIT', url: 'https://github.com/free-audio/clap' },
             { name: 'AAX SDK', license: 'GPLv3 / Commercial (Avid)', url: 'https://developer.avid.com/aax' },
           ].map((lib) => (
             <Box key={lib.name} sx={{ display: 'flex', alignItems: 'baseline', gap: 0.75, fontSize: '0.75rem' }}>
               <MuiLink
                 href={lib.url}
                 onClick={(e) => handleLinkClick(e, lib.url)}
-                sx={{ cursor: 'pointer', fontWeight: 600, fontSize: '0.75rem', minWidth: 130 }}
+                sx={{ cursor: 'pointer', fontWeight: 600, fontSize: '0.75rem', minWidth: 130, color: '#00d2ff' }}
               >
                 {lib.name}
               </MuiLink>
-              <Typography variant='caption' color='text.secondary' sx={{ fontSize: '0.70rem' }}>
+              <Typography variant='caption' sx={{ fontSize: '0.70rem', color: '#94a3b8' }}>
                 {lib.license}
               </Typography>
             </Box>
           ))}
         </Box>
 
-        <Divider sx={{ my: 0.5 }} />
+        <Divider sx={{ my: 0.5, borderColor: '#222938' }} />
 
-        {/* テーブル見出し（固定） */}
-        <Typography variant='subtitle2' sx={{ fontWeight: 600, fontSize: '0.80rem' }}>
+        <Typography variant='subtitle2' sx={{ fontWeight: 700, fontSize: '0.78rem', color: '#94a3b8', letterSpacing: '0.5px', textTransform: 'uppercase' }}>
           Frontend Dependencies
         </Typography>
 
-        {/* テーブル領域：余白を全て占有し、ここだけスクロール。
-            プラグインウィンドウが小さい時に flex で 0 まで潰れて見切れないよう、最低 100px を確保する。
-            この最低値を下回るような小さい画面ではダイアログ全体（DialogContent）がスクロールして
-            テーブル見出しまで辿り着けるようにする。 */}
-        <TableContainer component={Paper} variant='outlined' sx={{ flex: 1, minHeight: 100, overflow: 'auto' }}>
+        <TableContainer component={Paper} variant='outlined' sx={{ flex: 1, minHeight: 100, overflow: 'auto', backgroundColor: '#0b0e14', border: '1px solid #222938' }}>
           <Table
             size='small'
             stickyHeader
             sx={{
-              '& th, & td': { fontSize: '0.72rem', lineHeight: 1.2, py: 0.5, px: 1 },
-              '& thead th': { fontWeight: 700 },
+              '& th, & td': { fontSize: '0.72rem', lineHeight: 1.2, py: 0.5, px: 1, borderColor: '#222938' },
+              '& thead th': { fontWeight: 700, backgroundColor: '#141721', color: '#00d2ff' },
             }}
           >
             <TableHead>
@@ -192,35 +180,35 @@ export const LicenseDialog: React.FC<LicenseDialogProps> = ({ open, onClose }) =
               {rows.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={4}>
-                    <Typography variant='body2' color='text.secondary' sx={{ fontSize: '0.78rem' }}>
-                      ライセンス情報は未生成です。ビルド時に自動生成されます。
+                    <Typography variant='body2' sx={{ fontSize: '0.78rem', color: '#94a3b8' }}>
+                      Package information available in release bundle.
                     </Typography>
                   </TableCell>
                 </TableRow>
               ) : (
                 rows.map((r) => (
-                  <TableRow key={r.key} hover>
+                  <TableRow key={r.key} hover sx={{ '&:hover': { backgroundColor: 'rgba(0, 210, 255, 0.05)' } }}>
                     <TableCell>
-                      <Typography variant='body2' sx={{ fontWeight: 600, fontSize: '0.78rem' }}>
+                      <Typography variant='body2' sx={{ fontWeight: 600, fontSize: '0.78rem', color: '#f8fafc' }}>
                         {r.name}
                       </Typography>
-                      <Typography variant='caption' color='text.secondary' sx={{ fontSize: '0.68rem' }}>
+                      <Typography variant='caption' sx={{ fontSize: '0.68rem', color: '#94a3b8' }}>
                         {r.version}
                       </Typography>
                     </TableCell>
-                    <TableCell>{r.licenses}</TableCell>
-                    <TableCell>{r.publisher}</TableCell>
+                    <TableCell sx={{ color: '#94a3b8' }}>{r.licenses}</TableCell>
+                    <TableCell sx={{ color: '#94a3b8' }}>{r.publisher}</TableCell>
                     <TableCell sx={{ maxWidth: 220, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                       {r.repository ? (
                         <MuiLink
                           href={r.repository}
                           onClick={(e) => handleLinkClick(e, r.repository)}
-                          sx={{ cursor: 'pointer' }}
+                          sx={{ cursor: 'pointer', color: '#00d2ff' }}
                         >
                           {r.repository}
                         </MuiLink>
                       ) : (
-                        <Typography variant='caption' color='text.secondary'>
+                        <Typography variant='caption' sx={{ color: '#64748b' }}>
                           -
                         </Typography>
                       )}
@@ -232,8 +220,8 @@ export const LicenseDialog: React.FC<LicenseDialogProps> = ({ open, onClose }) =
           </Table>
         </TableContainer>
       </DialogContent>
-      <DialogActions sx={{ px: 1, py: 0.5 }}>
-        <Button onClick={onClose} variant='contained' size='small' sx={{ py: 0.25, px: 1.25, fontSize: '0.80rem' }}>
+      <DialogActions sx={{ px: 2, py: 1, borderTop: '1px solid #222938', backgroundColor: '#0e121a' }}>
+        <Button onClick={onClose} variant='contained' size='small' sx={{ py: 0.35, px: 2, fontSize: '0.80rem', backgroundColor: '#00d2ff', color: '#090c12', fontWeight: 700, '&:hover': { backgroundColor: '#38bdf8' } }}>
           Close
         </Button>
       </DialogActions>

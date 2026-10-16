@@ -39,15 +39,15 @@ if(UNIX AND NOT APPLE)
 endif()
 
 # プラグイン定義（JUCE v8）
-juce_add_plugin(ZeroComp
+juce_add_plugin(Pressor2000
     VERSION ${PROJECT_VERSION}
-    PRODUCT_NAME "ZeroComp"
-    COMPANY_NAME "Jun Murakami"
-    BUNDLE_ID "com.junmurakami.zerocomp"
-    PLUGIN_MANUFACTURER_CODE Jmbc
-    PLUGIN_CODE ZrCp
+    PRODUCT_NAME "Pressor2000"
+    COMPANY_NAME "scobru"
+    BUNDLE_ID "com.scobru.pressor2000"
+    PLUGIN_MANUFACTURER_CODE Scob
+    PLUGIN_CODE Pr2k
     FORMATS ${ZEROCOMP_FORMATS}
-    LV2URI "https://junmurakami.com/apps/zerocomp"
+    LV2URI "https://github.com/scobru/pressor2000"
     PLUGIN_AU_MAIN_TYPE "aufx"
     VST3_CATEGORIES "Fx" "Dynamics"
     AAX_CATEGORY "AAX_ePlugInCategory_Dynamics"
@@ -64,15 +64,15 @@ juce_add_plugin(ZeroComp
     NEEDS_WEBVIEW2 TRUE
 )
 
-juce_generate_juce_header(ZeroComp)
+juce_generate_juce_header(Pressor2000)
 
 # CLAP ターゲット生成（clap-juce-extensions 経由・Windows / macOS / Linux 全て）
-clap_juce_extensions_plugin(TARGET ZeroComp
-    CLAP_ID "com.junmurakami.zerocomp"
+clap_juce_extensions_plugin(TARGET Pressor2000
+    CLAP_ID "com.scobru.pressor2000"
     CLAP_FEATURES audio-effect compressor)
 
 # ソースファイル
-target_sources(ZeroComp PRIVATE
+target_sources(Pressor2000 PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/src/PluginEditor.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/PluginEditor.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/PluginProcessor.cpp
@@ -91,7 +91,7 @@ target_sources(ZeroComp PRIVATE
 )
 
 if(APPLE)
-    target_sources(ZeroComp PRIVATE
+    target_sources(Pressor2000 PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}/src/KeyEventForwarder_mac.mm
     )
 endif()
@@ -103,15 +103,15 @@ configure_file(
     @ONLY
 )
 
-target_include_directories(ZeroComp PRIVATE
+target_include_directories(Pressor2000 PRIVATE
     ${ZEROCOMP_SRC_DIR}
     ${ZEROCOMP_SRC_DIR}/dsp
     ${CMAKE_CURRENT_BINARY_DIR}
 )
 
-target_include_directories(ZeroComp SYSTEM PUBLIC ${JUCE_MODULES_DIR})
+target_include_directories(Pressor2000 SYSTEM PUBLIC ${JUCE_MODULES_DIR})
 
-target_link_libraries(ZeroComp
+target_link_libraries(Pressor2000
     PRIVATE
         juce::juce_audio_basics
         juce::juce_audio_devices
@@ -135,18 +135,18 @@ target_link_libraries(ZeroComp
 #  JUCE はプラグインターゲットへ X11 を直接リンクしないため、自前で追加する。
 if(UNIX AND NOT APPLE)
     find_package(X11 REQUIRED)
-    target_link_libraries(ZeroComp PRIVATE ${X11_LIBRARIES})
-    target_include_directories(ZeroComp PRIVATE ${X11_INCLUDE_DIR})
+    target_link_libraries(Pressor2000 PRIVATE ${X11_LIBRARIES})
+    target_include_directories(Pressor2000 PRIVATE ${X11_INCLUDE_DIR})
 endif()
 
 # macOS: ヘッダパッド確保（署名/wraptool 対策）
 if(APPLE)
-    if (TARGET ZeroComp)
-        target_link_options(ZeroComp PRIVATE -Wl,-headerpad,578)
-        target_link_libraries(ZeroComp PUBLIC "-framework ApplicationServices")
+    if (TARGET Pressor2000)
+        target_link_options(Pressor2000 PRIVATE -Wl,-headerpad,578)
+        target_link_libraries(Pressor2000 PUBLIC "-framework ApplicationServices")
     endif()
 
-    foreach(wrapperTarget IN ITEMS ZeroComp_VST3 ZeroComp_AU ZeroComp_Standalone ZeroComp_AAX)
+    foreach(wrapperTarget IN ITEMS Pressor2000_VST3 Pressor2000_AU Pressor2000_Standalone Pressor2000_AAX)
         if (TARGET ${wrapperTarget})
             target_link_options(${wrapperTarget} PRIVATE -Wl,-headerpad,578)
             target_link_libraries(${wrapperTarget} PRIVATE "-framework ApplicationServices")
@@ -155,7 +155,7 @@ if(APPLE)
 endif()
 
 # 共通コンパイル定義（WebView 有効化）
-target_compile_definitions(ZeroComp PUBLIC
+target_compile_definitions(Pressor2000 PUBLIC
     JUCE_WEB_BROWSER=1
     JUCE_USE_CURL=0
     JUCE_VST3_CAN_REPLACE_VST2=0
@@ -163,8 +163,8 @@ target_compile_definitions(ZeroComp PUBLIC
     $<$<OR:$<CONFIG:Debug>,$<CONFIG:RelWithDebInfo>>:JUCE_DEBUG=1>
     $<$<PLATFORM_ID:Windows>:JUCE_USE_WIN_WEBVIEW2_WITH_STATIC_LINKING=1>
 
-    JucePlugin_ManufacturerCode=0x4a6d6263
-    JucePlugin_PluginCode=0x5a724370
+    JucePlugin_ManufacturerCode=0x53636f62
+    JucePlugin_PluginCode=0x5072326b
     JucePlugin_IsSynth=0
     JucePlugin_WantsMidiInput=0
     JucePlugin_ProducesMidiOutput=0
@@ -173,7 +173,7 @@ target_compile_definitions(ZeroComp PUBLIC
 )
 
 # Dev/Prod の読み分け
-target_compile_definitions(ZeroComp PRIVATE
+target_compile_definitions(Pressor2000 PRIVATE
     $<$<CONFIG:Debug>:ZEROCOMP_DEV_MODE=1>
     $<$<CONFIG:Debug>:LOCAL_DEV_SERVER_ADDRESS="http://127.0.0.1:5173">
     $<$<NOT:$<CONFIG:Debug>>:ZEROCOMP_DEV_MODE=0>
@@ -212,7 +212,7 @@ add_custom_target(ZipWebViewFiles
 )
 
 cmake_path(GET PUBLIC_PATH FILENAME ZIPPED_FILES_PREFIX)
-target_compile_definitions(ZeroComp PRIVATE
+target_compile_definitions(Pressor2000 PRIVATE
     $<$<NOT:$<CONFIG:Debug>>:ZIPPED_FILES_PREFIX="${ZIPPED_FILES_PREFIX}/">
 )
 
@@ -223,32 +223,29 @@ juce_add_binary_data(WebViewFiles
 )
 add_dependencies(WebViewFiles ZipWebViewFiles)
 
-target_link_libraries(ZeroComp PRIVATE
+target_link_libraries(Pressor2000 PRIVATE
     $<$<NOT:$<OR:$<CONFIG:Debug>,$<CONFIG:RelWithDebInfo>>>:WebViewFiles>
 )
 
 # Windows 固有設定
 if(WIN32)
-    target_compile_definitions(ZeroComp PRIVATE
+    target_compile_definitions(Pressor2000 PRIVATE
         NOMINMAX
         WIN32_LEAN_AND_MEAN
     )
-    target_compile_options(ZeroComp PRIVATE
+    target_compile_options(Pressor2000 PRIVATE
         /utf-8
     )
-    target_link_libraries(ZeroComp PRIVATE Dbghelp)
+    target_link_libraries(Pressor2000 PRIVATE Dbghelp)
 
-    # CLAP ラッパー(clap-juce-wrapper.cpp)は clap-juce-extensions 側で ZeroComp_CLAP
-    # ターゲットとしてコンパイルされ、上の ZeroComp への /utf-8 が届かない。DPI パッチが
-    # UTF-8 の日本語コメントを追加しているため、MSVC が既定コードページ(CP932)で解釈すると
-    # コメントが後続コードを飲み込み C2059/C3861 等で壊れる。CLAP にも /utf-8 を明示する。
-    if(TARGET ZeroComp_CLAP)
-        target_compile_options(ZeroComp_CLAP PRIVATE /utf-8)
+    # CLAP ラッパー(clap-juce-wrapper.cpp)
+    if(TARGET Pressor2000_CLAP)
+        target_compile_options(Pressor2000_CLAP PRIVATE /utf-8)
     endif()
 endif()
 
 if(MSVC)
-    foreach(wrapperTarget IN ITEMS ZeroComp ZeroComp_VST3 ZeroComp_Standalone ZeroComp_AAX)
+    foreach(wrapperTarget IN ITEMS Pressor2000 Pressor2000_VST3 Pressor2000_Standalone Pressor2000_AAX)
         if (TARGET ${wrapperTarget})
             target_compile_options(${wrapperTarget} PRIVATE
                 $<$<CONFIG:Debug>:/Zi>

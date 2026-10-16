@@ -378,13 +378,13 @@ function App() {
           top: 8px;
           width: 2px;
           height: 2px;
-          background: rgba(79, 195, 247, 1);
+          background: #00d2ff;
           border-radius: 1px;
           pointer-events: none;
           box-shadow:
-            -4px 4px 0 0 rgba(79, 195, 247, 1),
-            -8px 8px 0 0 rgba(79, 195, 247, 1),
-            -1px 7px 0 0 rgba(79, 195, 247, 1);
+            -4px 4px 0 0 #00d2ff,
+            -8px 8px 0 0 #00d2ff,
+            -1px 7px 0 0 #00d2ff;
         }
 
         html, body, #root {
@@ -464,29 +464,59 @@ function App() {
             : { display: 'contents' }
           }
         >
-          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', px: 1, py: 0.5 }}>
-            <Typography
-              variant='body2'
-              component='div'
-              sx={{ flexGrow: 1, color: 'primary.main', fontWeight: 600, cursor: 'pointer' }}
-              onClick={openLicenseDialog}
-              title='Licenses'
-            >
-              ZeroComp
-            </Typography>
+          <Box sx={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', px: 1.5, pt: 1, pb: 0.5 }}>
+            <Box sx={{ display: 'flex', alignItems: 'baseline', gap: 1.5 }}>
+              <Typography
+                variant='h6'
+                component='div'
+                sx={{
+                  color: '#00d2ff',
+                  fontWeight: 800,
+                  fontSize: '1.2rem',
+                  letterSpacing: '1.5px',
+                  textTransform: 'uppercase',
+                  cursor: 'pointer',
+                  textShadow: '0 0 16px rgba(0, 210, 255, 0.4)',
+                }}
+                onClick={openLicenseDialog}
+                title='About Pressor2000'
+              >
+                PRESSOR 2000
+              </Typography>
+              <Typography
+                variant='caption'
+                sx={{
+                  color: '#64748b',
+                  fontSize: '0.65rem',
+                  fontWeight: 600,
+                  letterSpacing: '0.8px',
+                  textTransform: 'uppercase',
+                  display: { xs: 'none', sm: 'inline-block' },
+                }}
+              >
+                ZERO-LATENCY BROADCAST COMPRESSOR • VST3 / AU / CLAP
+              </Typography>
+            </Box>
             <Typography
               variant='caption'
-              color='text.secondary'
+              sx={{
+                color: '#94a3b8',
+                fontWeight: 600,
+                fontSize: '0.72rem',
+                letterSpacing: '0.6px',
+                cursor: 'pointer',
+                transition: 'color 0.15s ease',
+                '&:hover': { color: '#00d2ff' },
+              }}
               onClick={openLicenseDialog}
-              sx={{ cursor: 'pointer' }}
-              title='Licenses'
+              title='Licenses & Info'
             >
-              by Jun Murakami
+              BY SCOBRU
             </Typography>
           </Box>
 
           <Paper
-            elevation={2}
+            elevation={3}
             sx={{
               pt: isMobile ? 0 : 2,
               px: 2,
@@ -498,8 +528,11 @@ function App() {
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'stretch',
-              // モバイルでは divider も廃したのでメイン段と下段の gap を詰める（16 → 6px）
               gap: isMobile ? 0.75 : 2,
+              backgroundColor: '#12151f',
+              border: '1px solid #222938',
+              borderRadius: 2,
+              boxShadow: '0 8px 30px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.04)',
             }}
           >
             <Box
@@ -774,8 +807,13 @@ function App() {
                         border: '1px solid',
                         borderColor: autoMakeupOn ? 'primary.main' : 'divider',
                         backgroundColor: autoMakeupOn ? 'primary.main' : 'transparent',
-                        color: autoMakeupOn ? 'background.paper' : 'text.secondary',
-                        '&:hover': { backgroundColor: autoMakeupOn ? 'primary.dark' : 'grey.700' },
+                        color: autoMakeupOn ? '#090c12' : 'text.secondary',
+                        boxShadow: autoMakeupOn ? '0 0 10px rgba(0, 210, 255, 0.4)' : 'none',
+                        '&:hover': {
+                          backgroundColor: autoMakeupOn ? '#00b4dc' : 'rgba(0, 210, 255, 0.1)',
+                          borderColor: 'primary.main',
+                          color: autoMakeupOn ? '#090c12' : '#00d2ff',
+                        },
                       }}
                     >
                       {autoMakeupOn ? `Makeup  +${autoMakeupDb.toFixed(1)} dB` : 'Makeup'}
@@ -1016,7 +1054,11 @@ function App() {
                         borderColor: 'divider',
                         backgroundColor: 'transparent',
                         color: 'text.secondary',
-                        '&:hover': { backgroundColor: 'grey.700' },
+                        '&:hover': {
+                          backgroundColor: 'rgba(0, 210, 255, 0.1)',
+                          borderColor: 'primary.main',
+                          color: '#00d2ff',
+                        },
                       }}
                     >
                       {MODE_LABEL[meterMode]}
@@ -1194,22 +1236,13 @@ function App() {
         </Box>
 
         {IS_WEB_MODE && (
-          <>
           <Typography
             variant='caption'
             color='text.secondary'
             sx={{ mt: isMobile ? 0 : 1, textAlign: 'center', maxWidth: 720, lineHeight: 1.8, px: 2 }}
           >
-            ZeroComp — zero-latency broadcast-oriented compressor.
+            Pressor2000 — Precision Studio Compressor with Vintage Character & Real-time Visualization.
           </Typography>
-          <Typography
-            variant='caption'
-            color='text.secondary'
-            sx={{ mt: isMobile ? -1 : 0, textAlign: 'center', maxWidth: 720, lineHeight: 1, px: 2 }}
-          >
-            ゼロレイテンシーのコンプレッサーです。
-          </Typography>
-          </>
         )}
       </Box>
 
