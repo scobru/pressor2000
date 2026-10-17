@@ -2,6 +2,8 @@
 
 A high-precision **zero-latency** studio compressor with vintage analog character (VCA / Opto / FET / Vari-Mu), real-time transfer curve graph, and dual-mode metering / oscilloscope waveform visualization. Built with JUCE + WebView (Vite / React 19 / MUI). Ships as **VST3 / AU / CLAP / Standalone** on Windows & macOS.
 
+> **Note**: This project is a fork of [ZeroComp](https://github.com/Jun-Murakami/ZeroComp) by [Jun Murakami](https://github.com/Jun-Murakami).
+
 Maintained by **scobru** — [https://github.com/scobru/pressor2000](https://github.com/scobru/pressor2000)
 
 ## Highlights
@@ -246,4 +248,4 @@ It uses [JUCE](https://juce.com/) under the AGPLv3 option of its dual-licensing 
 
 ## Credits
 
-Developed by **Jun Murakami**. Built on **JUCE** with an embedded **WebView2 / WKWebView** frontend, and a WebAssembly build of the same DSP for the browser demo.
+Originally developed by [Jun Murakami](https://github.com/Jun-Murakami) as [ZeroComp](https://github.com/Jun-Murakami/ZeroComp). Rebranded, customized, and maintained by **scobru**. Built on **JUCE** with an embedded **WebView2 / WKWebView** frontend, and a WebAssembly build of the same DSP for the browser demo.

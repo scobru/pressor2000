@@ -99,6 +99,23 @@ export const LicenseDialog: React.FC<LicenseDialogProps> = ({ open, onClose }) =
             >
               scobru
             </MuiLink>
+            {' — '}
+            Fork of{' '}
+            <MuiLink
+              href='https://github.com/Jun-Murakami/ZeroComp'
+              onClick={(e) => handleLinkClick(e, 'https://github.com/Jun-Murakami/ZeroComp')}
+              sx={{ cursor: 'pointer', color: '#00d2ff' }}
+            >
+              ZeroComp
+            </MuiLink>
+            {' by '}
+            <MuiLink
+              href='https://github.com/Jun-Murakami'
+              onClick={(e) => handleLinkClick(e, 'https://github.com/Jun-Murakami')}
+              sx={{ cursor: 'pointer', color: '#00d2ff' }}
+            >
+              Jun Murakami
+            </MuiLink>
           </Typography>
           <Typography variant='body2' sx={{ fontSize: '0.78rem', color: '#94a3b8' }}>
             Built with JUCE 8 • Ultra Low Latency DSP
