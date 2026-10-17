@@ -1,4 +1,4 @@
-name: Build Audio Plugins (VST3, AU, CLAP, Standalone)
+name: Build Audio Plugins (VST3, AU, AAX, CLAP, Standalone)
 
 on:
   push:
@@ -7,6 +7,17 @@ on:
   pull_request:
     branches: [ main ]
   workflow_dispatch:
+    inputs:
+      create_release:
+        description: 'Publish as GitHub Release'
+        required: false
+        type: boolean
+        default: false
+      tag_name:
+        description: 'Tag name for release (optional, e.g. v1.1.8)'
+        required: false
+        type: string
+        default: ''
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -62,6 +73,9 @@ jobs:
           if [ -d "CLAP/Pressor2000.clap" ] || [ -f "CLAP/Pressor2000.clap" ]; then
             cp -R "CLAP/Pressor2000.clap" ../../../../artifacts/macOS/
           fi
+          if [ -d "AAX/Pressor2000.aaxplugin" ]; then
+            cp -R "AAX/Pressor2000.aaxplugin" ../../../../artifacts/macOS/
+          fi
           
           cd ../../../../artifacts
           cp ../README.md macOS/ || true
@@ -107,8 +121,13 @@ jobs:
           cmake -B build -A x64 -DJUCE_WEBVIEW2_PACKAGE_LOCATION="$env:RUNNER_TEMP\webview2"
 
       - name: Build Plugins
+        shell: pwsh
         run: |
-          cmake --build build --config Release --target Pressor2000_VST3 Pressor2000_Standalone Pressor2000_CLAP --parallel
+          $targets = @("Pressor2000_VST3", "Pressor2000_Standalone", "Pressor2000_CLAP")
+          if (Test-Path "aax-sdk\Interfaces\AAX.h") {
+            $targets += "Pressor2000_AAX"
+          }
+          cmake --build build --config Release --target $targets --parallel
 
       - name: Package Windows Artifacts
         shell: pwsh
@@ -130,6 +149,11 @@ jobs:
             Copy-Item "build\plugin\Pressor2000_artefacts\Release\CLAP\Pressor2000.clap" "artifacts\Windows\"
           }
           
+          # AAX bundle (Pro Tools)
+          if (Test-Path "build\plugin\Pressor2000_artefacts\Release\AAX\Pressor2000.aaxplugin") {
+            Copy-Item -Recurse "build\plugin\Pressor2000_artefacts\Release\AAX\Pressor2000.aaxplugin" "artifacts\Windows\"
+          }
+          
           # Documentation
           if (Test-Path "README.md") { Copy-Item "README.md" "artifacts\Windows\" }
           if (Test-Path "LICENSE") { Copy-Item "LICENSE" "artifacts\Windows\" }
@@ -145,7 +169,7 @@ jobs:
 
   release:
     name: Create GitHub Release
-    if: startsWith(github.ref, 'refs/tags/v')
+    if: startsWith(github.ref, 'refs/tags/v') || (github.event_name == 'workflow_dispatch' && inputs.create_release)
     needs: [ build-macos, build-windows ]
     runs-on: ubuntu-latest
     permissions:
@@ -166,6 +190,7 @@ jobs:
       - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
+          tag_name: ${{ (inputs.tag_name != '' && inputs.tag_name) || github.ref_name }}
           files: release-assets/*
           generate_release_notes: true
           draft: false

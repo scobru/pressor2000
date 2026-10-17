@@ -1,6 +1,6 @@
 # Pressor2000
 
-A high-precision **zero-latency** studio compressor with vintage analog character (VCA / Opto / FET / Vari-Mu), real-time transfer curve graph, and dual-mode metering / oscilloscope waveform visualization. Built with JUCE + WebView (Vite / React 19 / MUI). Ships as **VST3 / AU / CLAP / Standalone** on Windows & macOS.
+A high-precision **zero-latency** studio compressor with vintage analog character (VCA / Opto / FET / Vari-Mu), real-time transfer curve graph, and dual-mode metering / oscilloscope waveform visualization. Built with JUCE + WebView (Vite / React 19 / MUI). Ships as **VST3 / AU / AAX (Pro Tools) / CLAP / Standalone** on Windows & macOS.
 
 > **Note**: This project is a fork of [ZeroComp](https://github.com/Jun-Murakami/ZeroComp) by [Jun Murakami](https://github.com/Jun-Murakami).
 
@@ -68,6 +68,18 @@ Output:
 - Distribution zip: `releases/<VERSION>/ZeroComp_<VERSION>_Linux_VST3_LV2_CLAP_Standalone.zip`
 
 LV2 and CLAP are gated behind `if(UNIX AND NOT APPLE)` in CMake, so existing Windows / macOS release flows are unaffected. AU and AAX are skipped on Linux as expected.
+
+### Pro Tools (AAX) Support
+
+Pressor2000 includes native support for Avid Pro Tools via the **AAX** format:
+1. **Compiling AAX**:
+   - Place the Avid AAX SDK in `aax-sdk/` or define the `JUCE_AAX_SDK_PATH` environment variable.
+   - CMake automatically enables the `Pressor2000_AAX` target with `AAX_ePlugInCategory_Dynamics`.
+   - On macOS, builds `Pressor2000.aaxplugin` (dest: `/Library/Application Support/Avid/Audio/Plug-Ins/`).
+   - On Windows, builds `Pressor2000.aaxplugin` (dest: `C:\Program Files\Common Files\Avid\Audio\Plug-Ins\`).
+   - *Commercial Pro Tools*: Retail Pro Tools requires AAX binaries to be digitally signed using PACE Eden (`wraptool` with Avid developer certificate). For Pro Tools Developer Edition, unsigned binaries work out of the box.
+2. **Instant Pro Tools use via VST3 Wrapper**:
+   - To use Pressor2000 immediately in any retail Pro Tools version without needing PACE signing, load `Pressor2000.vst3` through an AAX wrapper such as **Blue Cat's PatchWork** or **DDMF Metaplugin**.
 
 ### Manual CMake build (for development)
 
