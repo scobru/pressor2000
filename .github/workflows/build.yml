@@ -96,9 +96,15 @@ jobs:
           npm run build
           cd ..
 
+      - name: Install WebView2 SDK
+        shell: pwsh
+        run: |
+          nuget install Microsoft.Web.WebView2 -Version 1.0.1901.177 -OutputDirectory "$env:RUNNER_TEMP\webview2"
+          if ($LASTEXITCODE -ne 0) { exit 1 }
+
       - name: Configure CMake
         run: |
-          cmake -B build -A x64
+          cmake -B build -A x64 -DJUCE_WEBVIEW2_PACKAGE_LOCATION="$env:RUNNER_TEMP\webview2"
 
       - name: Build Plugins
         run: |
